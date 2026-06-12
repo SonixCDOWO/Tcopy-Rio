@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Votantes - Río Aro</title>
+    
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #2563eb;
+            --background-gradient: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--background-gradient);
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 20px;
+        }
+
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 1rem; width: 100%; }
+
+        .table-container {
+            padding: 1.5rem;
+            background: #fff;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            min-height: 80vh;
+        }
+
+        h1 { text-align: center; color: #343a40; font-weight: 700; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 25px; }
+
+        thead th {
+            background-color: #0d6efd !important;
+            color: white !important;
+            text-align: center;
+            vertical-align: middle;
+            border: none;
+        }
+
+        .stats-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        @media print {
+            .header-actions, .actions-col, .btn, .filter-section, .btn-restore { display: none !important; }
+            body { background: white !important; padding: 0; }
+            .table-container { box-shadow: none; border: none; padding: 0; }
+            .main-container { max-width: 100%; margin: 0; }
+        }
+        
+        #loading { text-align: center; padding: 60px; }
+        
+        .modal-overlay {
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 1050; 
+            justify-content: center; 
+            align-items: center; 
+            backdrop-filter: blur(3px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="table-container">
+        
+        <!-- Acciones Superiores -->
+        <div class="d-flex justify-content-between align-items-center mb-4 header-actions">
+            <a href="/base_de_datos" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a Base de Datos
+            </a>
+            
+            <div class="d-flex gap-2">
+                <button onclick="openModal()" class="btn btn-success">
+                    <i class="bi bi-person-plus-fill"></i> Agregar Persona
+                </button>
+                <button onclick="window.print()" class="btn btn-info text-white">
+                    <i class="bi bi-printer-fill"></i> Generar Reporte / Imprimir
+                </button>
+            </div>
+        </div>
+
+        <h1>Listado de Votantes</h1>
+        <p class="subtitle">Residentes mayores de 16 años con Cédula (Filtrado para el proceso electoral)</p>
+
+        <!-- Filtros -->
+        <div class="row g-3 mb-4 filter-section">
+            <div class="col-md-5">
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-primary"></i></span>
+                    <input type="text" id="txtBuscar" class="form-control" placeholder="Buscar por nombre, cédula o ubicación..." onkeyup="aplicarFiltros()">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select id="selTorre" class="form-select shadow-sm" onchange="aplicarFiltros()">
+                    <option value="">Todas las Torres / Calles</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="stats-card shadow-sm">
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Votantes Visibles</small>
+                    <span id="badgeTotal" class="h5 mb-0 text-primary fw-bold">0</span>
+                </div>
+            </div>
+            <div class="col-md-2 d-flex align-items-center justify-content-end">
+                <button onclick="restaurarVotantes()" class="btn btn-outline-warning btn-sm btn-restore" title="Mostrar personas ocultadas">
+                    <i class="bi bi-arrow-counterclockwise"></i> Restablecer Lista
+                </button>
+            </div>
+        </div>
+
+        <!-- Indicador de Carga -->
+        <div id="loading">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Sincronizando con la nube...</p>
+        </div>
+
+        <!-- Tabla -->
+        <table id="votersTable" class="table table-hover table-striped table-bordered shadow-sm" style="display:none;">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">N°</th>
+                    <th>Ubicación (Comunidad / Calle / Casa)</th>
+                    <th>Nombre Completo</th>
+                    <th style="width: 150px;">Cédula</th>
+                    <th class="actions-col" style="width: 80px;">Quitar</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+
+        <div id="noDataMessage" class="alert alert-light text-center border shadow-sm" style="display:none;">
+            <i class="bi bi-info-circle me-2"></i> No se encontraron resultados para los filtros aplicados.
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar persona -->
+<div id="addModal" class="modal-overlay">
+    <div style="background: white; padding: 2rem; border-radius: 0.8rem; width: 95%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+        <h4 class="mb-3 text-primary fw-bold"><i class="bi bi-person-add"></i> Nuevo Votante</h4>
+        <form id="addForm">
+            <div class="mb-2">
+                <label class="form-label fw-bold">Comunidad / Sector:</label>
+                <input type="text" class="form-control" id="inputComunidad" value="Rio Aro" required>
+            </div>
+            <div class="row mb-2">
+                <div class="col">
+                    <label class="form-label fw-bold">Torre / Calle:</label>
+                    <input type="text" class="form-control" id="inputTorre" required placeholder="Ej: Torre A">
+                </div>
+                <div class="col">
+                    <label class="form-label fw-bold">Casa / Apto:</label>
+                    <input type="text" class="form-control" id="inputCasa" required placeholder="Ej: 102">
+                </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label fw-bold">Nombre Completo:</label>
+                <input type="text" class="form-control" id="inputNombre" required>
+            </div>
+            <div class="mb-2">
+                <label class="form-label fw-bold">Cédula de Identidad:</label>
+                <input type="text" class="form-control" id="inputCedula" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Edad:</label>
+                <input type="number" class="form-control" id="inputEdad" min="16" value="16" required>
+                <div class="form-text text-danger">* Solo mayores de 16 años pueden ser votantes.</div>
+            </div>
+            
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" onclick="closeModal()" class="btn btn-light border">Cancelar</button>
+                <button type="submit" class="btn btn-primary px-4">Guardar en Base de Datos</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let datasetVotantes = [];
+
+    function normalizeKey(str) {
+        if (!str) return "";
+        return str.toLowerCase()
+                  .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+                  .replace(/[^a-z0-9]/g, ""); 
+    }
+
+    function getVal(obj, targetKey) {
+        const normalizedTarget = normalizeKey(targetKey);
+        const realKey = Object.keys(obj).find(k => normalizeKey(k) === normalizedTarget);
+        return realKey ? obj[realKey] : "";
+    }
+
+    function cleanVal(val) {
+        if (val === undefined || val === null) return "";
+        let s = String(val).trim();
+        return s.endsWith(".0") ? s.slice(0, -2) : s;
+    }
+
+    /** CARGA DE DATOS DESDE EL SERVIDOR **/
+    function loadData() {
+        const loading = document.getElementById('loading');
+        const table = document.getElementById('votersTable');
+        const noData = document.getElementById('noDataMessage');
+        const selTorre = document.getElementById('selTorre');
+
+        loading.style.display = 'block';
+        table.style.display = 'none';
+        noData.style.display = 'none';
+
+        // Obtener lista de Cédulas ocultadas localmente
+        const ocultos = JSON.parse(localStorage.getItem('votantes_ocultos') || "[]");
+
+        fetch('/api/excel?length=50000&start=0&draw=1')
+            .then(res => res.json())
+            .then(res => {
+                const records = res.data;
+                datasetVotantes = [];
+                const torresDetectadas = new Set();
+
+                records.forEach(person => {
+                    let cedula = cleanVal(getVal(person, "cedula de identidad"));
+                    
+                    // FILTRO LOCAL: Si la cédula está en la lista de ocultos, ignorarla
+                    if (ocultos.includes(cedula)) return;
+
+                    let edadRaw = getVal(person, "edad") || "0";
+                    let nombre = getVal(person, "nombre completo");
+                    let com = getVal(person, "comunidad");
+                    let torre = cleanVal(getVal(person, "torre"));
+                    let casa = cleanVal(getVal(person, "numero de casa / apto") || getVal(person, "casa"));
+                    let edad = parseInt(cleanVal(edadRaw).replace(/\D/g, '')) || 0;
+
+                    // Requisito de Negocio: Edad >= 16 y tener cédula
+                    if (edad >= 16 && cedula && cedula !== "") {
+                        datasetVotantes.push({
+                            rowId: person['__row'],
+                            nombre: nombre,
+                            cedula: cedula,
+                            comunidad: com,
+                            torre: torre,
+                            casa: casa,
+                            ubicacion: [com, torre, casa].filter(Boolean).join(" / ")
+                        });
+                        if(torre) torresDetectadas.add(torre);
+                    }
+                });
+
+                // Llenar filtro de torres
+                selTorre.innerHTML = '<option value="">Todas las Torres / Calles</option>';
+                Array.from(torresDetectadas).sort().forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t; opt.textContent = t;
+                    selTorre.appendChild(opt);
+                });
+
+                loading.style.display = 'none';
+                aplicarFiltros(); 
+            })
+            .catch(err => {
+                console.error(err);
+                loading.innerHTML = '<div class="alert alert-danger">Error crítico: No se pudo conectar con el servidor.</div>';
+            });
+    }
+
+    /** 
+     * BORRADO VISUAL (Solo en esta vista, persiste en LocalStorage)
+     */
+    function deleteRow(cedula) {
+        if(!confirm("¿Deseas ocultar a esta persona del Listado de Votantes? \n\n(No se eliminará de la Base de Datos general, solo de esta vista)")) return;
+        
+        // Obtener lista actual
+        let ocultos = JSON.parse(localStorage.getItem('votantes_ocultos') || "[]");
+        
+        // Agregar si no existe
+        if (!ocultos.includes(cedula)) {
+            ocultos.push(cedula);
+        }
+        
+        // Guardar
+        localStorage.setItem('votantes_ocultos', JSON.stringify(ocultos));
+        
+        // Refrescar tabla localmente
+        loadData();
+    }
+
+    /** RESTAURAR PERSONAS OCULTADAS **/
+    function restaurarVotantes() {
+        if(confirm("¿Quieres volver a mostrar todas las personas que habías quitado de este listado?")) {
+            localStorage.removeItem('votantes_ocultos');
+            loadData();
+        }
+    }
+
+    /** AGREGAR NUEVO VOTANTE **/
+    document.getElementById('addForm').onsubmit = function(e) {
+        e.preventDefault();
+        const edad = parseInt(document.getElementById('inputEdad').value);
+        if (isNaN(edad) || edad < 16) {
+            alert("Acción denegada: Solo mayores de 16 años.");
+            return;
+        }
+
+        const data = [{
+            "Comunidad": document.getElementById('inputComunidad').value,
+            "Torre": document.getElementById('inputTorre').value,
+            "Numero de casa / apto": document.getElementById('inputCasa').value,
+            "Nombre completo": document.getElementById('inputNombre').value,
+            "Cedula de identidad": document.getElementById('inputCedula').value,
+            "Edad": edad.toString()
+        }];
+
+        fetch('/api/update-excel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ datos: data })
+        }).then(res => {
+            if(res.ok) { 
+                closeModal(); 
+                loadData(); 
+                alert("Votante agregado exitosamente a la Base de Datos.");
+            } else { 
+                alert("Error al guardar los datos."); 
+            }
+        });
+    };
+
+    /** LÓGICA DE FILTRADO EN PANTALLA **/
+    function aplicarFiltros() {
+        const busqueda = document.getElementById('txtBuscar').value.toLowerCase();
+        const filtroTorre = document.getElementById('selTorre').value;
+        const tbody = document.getElementById('tableBody');
+        const badgeTotal = document.getElementById('badgeTotal');
+
+        tbody.innerHTML = '';
+
+        const resultados = datasetVotantes.filter(v => {
+            const matchTexto = v.nombre.toLowerCase().includes(busqueda) || 
+                               v.cedula.includes(busqueda) || 
+                               v.ubicacion.toLowerCase().includes(busqueda);
+            const matchTorre = filtroTorre === "" || v.torre === filtroTorre;
+            return matchTexto && matchTorre;
+        });
+
+        resultados.forEach((v, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="text-center fw-bold text-muted">${index + 1}</td>
+                <td><small>${v.ubicacion}</small></td>
+                <td class="fw-bold">${v.nombre}</td>
+                <td class="text-center">${v.cedula}</td>
+                <td class="actions-col text-center">
+                    <button onclick="deleteRow('${v.cedula}')" class="btn btn-outline-danger btn-sm" title="Quitar de esta lista">
+                        <i class="bi bi-eye-slash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        badgeTotal.textContent = resultados.length;
+        document.getElementById('votersTable').style.display = resultados.length ? 'table' : 'none';
+        document.getElementById('noDataMessage').style.display = resultados.length ? 'none' : 'block';
+    }
+
+    function openModal() { document.getElementById('addModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+
+    loadData();
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('addModal')) closeModal();
+    }
+</script>
+</body>
+</html>
