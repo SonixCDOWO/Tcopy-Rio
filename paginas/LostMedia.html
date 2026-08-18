@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Analítico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Estilos globales y del sidebar -->
+  <link rel="stylesheet" href="/assets/css/Navs&Headers.css">
+  <!-- <link rel="stylesheet" href="/assets/css/Sidebar.css"> -->
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
+  
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Librerías JS: SheetJS, Chart.js, jspdf, html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Hojas de estilo unificadas del portal -->
+  <link rel="stylesheet" href="/assets/css/Navs&Headers.css">
+  <link rel="stylesheet" href="/assets/css/Sidebar.css">
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
+
+  <style>
+    body {
+        font-family: var(--font-stack);
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6) !important; /* Fondo azul unificado */
+        min-height: 100vh;
+        margin: 0;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Estructura de tarjeta para el contenedor del dashboard */
+    .dashboard-container {
+        background: #ffffff !important;
+        border-radius: 1rem !important;
+        border: none !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+        overflow: hidden !important;
+        max-width: 1400px;
+        margin: 0.5rem auto 2rem auto !important; /* <--- Sube la tarjeta reduciendo el margen superior a 0.5rem */
+        padding: 0 0 2rem 0 !important;
+    }
+
+    /* Cabecera idéntica a la de Base de Datos */
+    /* Cabecera del Dashboard */
+    .dashboard-header {
+        background: linear-gradient(120deg, #5d2c6c, #441752) !important; /* Degradado Morado */
+        color: white !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+        padding-left: 2rem !important;
+        border-radius: 1rem 1rem 0 0 !important;
+        margin-bottom: 1.5rem !important;
+        text-align: left !important;
+    }
+
+    .dashboard-header h1 {
+        color: white !important;
+        font-weight: bold !important;
+        font-size: 2rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .dashboard-header .subtitle {
+        color: rgba(255, 255, 255, 0.8) !important;
+        margin-bottom: 0 !important;
+    }
+
+        .wapper-aside{
+        position: fixed;
+        width: 10px;
+        height: 100%;
+        display: grid;
+        align-items: center;
+        z-index: 100;
+    }
+
+    .wapper-aside:hover .sidebar{
+        transform: translateX(0);
+    }
+
+    .sidebar{
+        z-index: 101;
+        position: absolute;
+        background-color: white;
+        width: max-content;
+        border-radius: 10px;
+        padding:  2rem 1rem;
+        transform: translateX(-90%);
+        transition: transform .3s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.30);
+    }
+
+    .sidebar:hover .sidebar_element{
+        grid-template-columns: 40px 1fr;
+    }
+
+    .sidebar_list{
+      height: 100%;
+      list-style: none;
+        padding: 0;
+        margin-bottom: 0;
+        margin-top: 0;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+        justify-content: center;
+    }
+
+    .sidebar_list a{
+      text-decoration: none;
+    }
+
+    .sidebar_element{
+        padding: .8rem 1.3rem;
+        border-radius: 10px;
+        display: grid;
+        align-items: center;
+        grid-template-columns: 40px 0fr;
+        color: #526581;
+
+        transition:  grid-template-columns .5s;
+    }
+
+    .sidebar_element:hover{
+        background-color: #e3b707;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .sidebar_element a{
+      text-decoration: none;
+      color: #526581;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .sidebar_element a:hover{
+      color: #fff;
+    }
+
+    .sidebar_icon{
+        width: 100%;
+        overflow: hidden;
+        justify-self: center;
+    }
+
+    .sidebar_text{
+        padding-left: 1.3rem;
+        text-wrap: nowrap;
+        font-size: 1.1rem;
+    }
+
+    .sidebar_hide{
+        overflow: hidden;
+    }
+
+    @media screen and (min-width: 1340px) and (max-width: 1360px){
+      .sidebar{
+        padding:  1rem .5rem;
+      }
+
+      .sidebar_list{
+        gap: .2rem;
+
+      }
+
+      .sidebar_element{
+        padding: .8rem .8rem;
+    }
+
+    /* Para que los iconos resalten un poco más */
+    .bi-accessibility { font-weight: bold; }
+    
+    /* Evitar que las filas se vuelvan muy altas por los iconos */
+    #editableTable td {
+      padding: 8px 10px;
+      vertical-align: middle;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .small {
+      color: #555;
+      font-weight: 500;
+    }
+  }
+  </style>
+
+</head>
+<body>
+
+  <!-- Navegación superior (Reutilizada) -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand nav-link" href="/">
+        <i class="bi bi-cpu-fill text-warning"></i> Octava Estrella
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Sidebar (Reutilizado) -->
+    <div class="wapper-aside">
+        <aside class="sidebar">
+        <ul class="sidebar_list">
+          
+          <a href="/index">
+            <li class="sidebar_element">
+                <img src="../assets/icons/regresar.svg" alt="home" class="sidebar_icon" width="35px" height="35px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Inicio</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/base_de_datos">
+            <li class="sidebar_element">
+                <img src="../assets/icons/datos-black.png" alt="estadisticas" class="sidebar_icon" width="20px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Base de datos</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/comunidades">
+              <li class="sidebar_element">
+                <img src="../assets/icons/vista rapida-black.png" alt="informe" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Jerarquia</p>
+                </div>
+            </li>
+          </a>
+            
+          <a href="/dashboard">
+            <li class="sidebar_element">
+                <i class="bi bi-pie-chart-fill sidebar_icon" style="font-size: 1.5rem; text-align: center; color: #000000;"></i>
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Dashboard</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/historia">
+            <li class="sidebar_element">
+                <img src="../assets/icons/historial.svg" alt="informe" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Historial</p>
+                </div>
+            </li>
+          </a>
+            
+          <a href="/calendario">
+            <li class="sidebar_element">
+                <img src="../assets/icons/calendario.svg" alt="calendario" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Calendario</p>
+                </div>
+            </li>
+          </a>           
+
+          <a href="/galeria">
+            <li class="sidebar_element">
+                <img src="../assets/icons/galeria.svg" alt="galeria" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Galeria</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/listado_votantes">
+            <li class="sidebar_element">
+                <img src="../assets/icons/cuaderno-votacion.svg" alt="votantes" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Listado de Votantes</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/importar">
+            <li class="sidebar_element">
+                <img src="../assets/icons/importar.png" alt="importar" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Importar Datos</p>
+                </div>
+            </li>
+          </a>
+        </ul>
+    </aside>
+  </div>
+
+  <main class="dashboard-main">
+    
+    <!-- Área exportable a PDF -->
+    <div id="pdf-content" class="dashboard-container">
+      
+      <header class="dashboard-header">
+        <h1 class="mb-0 fw-bold"><i class="bi bi-pie-chart-fill me-2"></i> Resumen Comunitario</h1>
+        <p class="subtitle">Análisis estadístico y demográfico de la comunidad</p>
+      </header>
+
+
+
+          <!-- Controles superiores -->
+        <div class="dashboard-controls no-print">
+          <div class="file-upload-wrapper">
+            <span id="loadingStatus" class="file-name-display" style="font-weight: 600; color: #007bff;">
+              <i class="bi bi-arrow-repeat spin-icon"></i> Cargando datos automáticamente...
+            </span>
+            <label for="excelUpload" class="custom-file-upload" style="font-size: 0.85rem; padding: 8px 14px;">
+              <i class="bi bi-file-earmark-excel"></i> Cargar manualmente
+            </label>
+            <input id="excelUpload" type="file" accept=".xlsx, .xls"/>
+          </div>
+          <button id="exportPdfBtn" class="export-btn" disabled>
+            <i class="bi bi-file-earmark-pdf"></i> Exportar Pestaña a PDF
+          </button>
+          <button id="exportAllPdfBtn" class="export-btn" style="background: #0d6efd;" disabled>
+            <i class="bi bi-files"></i> Exportar Todo a PDF
+          </button>
+        </div>
+
+      <!-- KPIs -->
+      <section class="kpi-container">
+        <div class="kpi-card">
+          <div class="kpi-icon blue"><i class="bi bi-people-fill"></i></div>
+          <div class="kpi-info">
+            <h3>Población Total</h3>
+            <p id="kpiTotal">0</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon green"><i class="bi bi-house-door-fill"></i></div>
+          <div class="kpi-info">
+            <h3>Total Familias</h3>
+            <p id="kpiFamilias">0</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon red"><i class="bi bi-heart-pulse-fill"></i></div>
+          <div class="kpi-info">
+            <h3>Población Vulnerable</h3>
+            <p id="kpiVulnerable">0</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon orange"><i class="bi bi-backpack-fill"></i></div>
+          <div class="kpi-info">
+            <h3>Menores de Edad</h3>
+            <p id="kpiMenores">0</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pestañas (Tabs nativos) -->
+      <div class="tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn active" onclick="openTab(event, 'tabDemografia')">Demografía y Estructura</button>
+          <button class="tab-btn" onclick="openTab(event, 'tabSalud')">Salud y Atención</button>
+          <button class="tab-btn" onclick="openTab(event, 'tabEducacion')">Educación y Socioeconomía</button>
+          <button class="tab-btn" onclick="openTab(event, 'tabVivienda')">Vivienda y Servicios</button>
+          <button class="tab-btn" onclick="openTab(event, 'tabDensidad')">Distribución Territorial</button>
+        </div>
+
+        <!-- Contenido Pestañas -->
+        <div class="tabs-content">
+          <!-- Pestaña 1 -->
+          <div id="tabDemografia" class="tab-pane active" style="display: block;">
+            <div class="charts-grid-2">
+              <div class="chart-box">
+                <h4>Pirámide Poblacional</h4>
+                <canvas id="chartPiramide"></canvas>
+              </div>
+              <div class="chart-box">
+                <h4>Distribución por Parentesco</h4>
+                <div class="pie-container">
+                  <canvas id="chartParentesco"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 2 -->
+          <div id="tabSalud" class="tab-pane" style="display: none;">
+            <div class="charts-grid-1">
+              <div class="chart-box">
+                <h4>Top Enfermedades y Discapacidades</h4>
+                <canvas id="chartEnfermedades"></canvas>
+              </div>
+            </div>
+            <div class="charts-grid-2">
+              <div class="chart-box">
+                <h4>Población Materno-Infantil</h4>
+                <div class="mini-kpis">
+                  <div class="mini-kpi">
+                    <h5>Embarazadas</h5>
+                    <span id="kpiEmbarazadas">0</span>
+                  </div>
+                  <div class="mini-kpi">
+                    <h5>Lactantes (0-11 meses)</h5>
+                    <span id="kpiLactantes">0</span>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-box table-wrapper">
+                <h4>Control de Medicamentos (Top requeridos)</h4>
+                <table class="simple-table" id="tableMedicamentos">
+                  <thead>
+                    <tr>
+                      <th>Medicamento</th>
+                      <th>Cantidad de personas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td colspan="2">Cargue el archivo para ver los datos</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 3 -->
+          <div id="tabEducacion" class="tab-pane" style="display: none;">
+            <div class="charts-grid-2">
+              <div class="chart-box">
+                <h4>Nivel Educativo</h4>
+                <canvas id="chartEducacion"></canvas>
+              </div>
+              <div class="chart-box">
+                <h4>Situación Laboral</h4>
+                <div style="position: relative; height: 350px; width: 100%;">
+                  <canvas id="chartLaboral"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pestaña 4 -->
+          <div id="tabVivienda" class="tab-pane" style="display: none;">
+            <div class="charts-grid-2">
+              <div class="chart-box">
+                <h4>Estatus de Tenencia (Condición Vivienda)</h4>
+                <canvas id="chartTenencia"></canvas>
+              </div>
+              <div class="chart-box">
+                <h4>Permanencia Residencial</h4>
+                <canvas id="chartOcupante"></canvas>
+              </div>
+            </div>
+          </div>
+          </div>
+          
+          <!-- Pestaña 5: Distribución Territorial y Densidad -->
+          <div id="tabDensidad" class="tab-pane" style="display: none;">
+            <div class="charts-grid-2">
+              <div class="chart-box">
+                <h4>Distribución Global por Comunidad</h4>
+                <div style="position: relative; height: 350px; width: 100%;">
+                  <canvas id="chartComunidad"></canvas>
+                </div>
+              </div>
+              <div class="chart-box">
+                <h4>Distribución Detallada por Torre</h4>
+                <div style="position: relative; height: 500px; width: 100%;">
+                  <canvas id="chartComunidadTorre"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="chart-box" style="margin-top: 15px;">
+              <h4>Densidad y Ocupación por Comunidad (Viviendas Únicas)</h4>
+              <div class="mini-kpis" id="kpiDensidadContainer" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 15px;">
+                <!-- Aquí se inyectarán las tarjetas vía JS -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+     </div> <!-- Fin del contenedor principal del dashboard -->
+
+    </div> <!-- Fin del pdf-content -->
+  </main>
+
+  <!-- Lógica específica del dashboard -->
+  <script src="/assets/js/dashboard.js"></script>
+
+  <script>
+    // Lógica para el sistema de pestañas (Tab System en Vanilla JS)
+    function openTab(evt, tabName) {
+      // Ocultar todas las pestañas
+      var i, tabcontent, tablinks;
+      tabcontent = document.getElementsByClassName("tab-pane");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        tabcontent[i].classList.remove("active");
+      }
+      
+      // Quitar la clase "active" de todos los botones
+      tablinks = document.getElementsByClassName("tab-btn");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+      }
+      
+      // Mostrar la pestaña actual y añadir la clase "active" al botón
+      document.getElementById(tabName).style.display = "block";
+      document.getElementById(tabName).classList.add("active");
+      evt.currentTarget.classList.add("active");
+    }
+  </script>
+</body>
+</html>

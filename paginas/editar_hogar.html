@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Núcleo Familiar</title>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
+    <link rel="stylesheet" href="/assets/css/Navs&Headers.css">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6) !important;
+            background-attachment: fixed !important;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container { max-width: 1200px; }
+
+        .person-card {
+            background: #ffffff !important;
+            border-radius: 1rem !important;
+            border: none !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+            overflow: hidden !important;
+            margin-top: 2.5rem !important;
+            margin-bottom: 2rem !important;
+            padding: 0 !important;
+        }
+
+        .header-gradient {
+            background: linear-gradient(120deg, #0284c7, #0369a1) !important;
+            color: white !important;
+            padding: 1.5rem 2rem !important;
+            border-radius: 1rem 1rem 0 0 !important;
+            margin-bottom: 0 !important;
+            text-align: left !important;
+        }
+
+        .header-gradient h1 {
+            color: white !important;
+            font-weight: bold !important;
+            font-size: 2rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        .header-gradient .subtitle {
+            color: rgba(255, 255, 255, 0.85) !important;
+            margin-bottom: 0 !important;
+            font-size: 1rem;
+        }
+
+        .wapper-aside {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 10px;
+            height: 100%;
+            display: grid;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .wapper-aside:hover .sidebar {
+            transform: translateX(0);
+        }
+
+        .sidebar {
+            z-index: 101;
+            position: absolute;
+            background-color: white;
+            width: max-content;
+            border-radius: 10px;
+            padding: 2rem 1rem;
+            transform: translateX(-90%);
+            transition: transform .3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.30);
+        }
+
+        .sidebar:hover .sidebar_element {
+            grid-template-columns: 40px 1fr;
+        }
+
+        .sidebar_list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 0;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: .4rem;
+            justify-content: center;
+        }
+
+        .sidebar_list a { text-decoration: none; }
+
+        .sidebar_element {
+            padding: .8rem 1.3rem;
+            border-radius: 10px;
+            display: grid;
+            align-items: center;
+            grid-template-columns: 40px 0fr;
+            color: #526581;
+            transition: grid-template-columns .5s;
+        }
+
+        .sidebar_element:hover {
+            background-color: #e3b707;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .sidebar_element a {
+            text-decoration: none;
+            color: #526581;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .sidebar_element a:hover { color: #fff; }
+
+        .sidebar_icon {
+            width: 100%;
+            overflow: hidden;
+            justify-self: center;
+        }
+
+        .sidebar_text {
+            padding-left: 1.3rem;
+            text-wrap: nowrap;
+            font-size: 1.1rem;
+        }
+
+        .sidebar_hide { overflow: hidden; }
+
+        .section-title {
+            color: #1e3a8a;
+            font-weight: 700;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Unificado -->
+    <div class="wapper-aside">
+        <aside class="sidebar">
+            <ul class="sidebar_list">
+                <a href="/"><li class="sidebar_element"><img src="../assets/icons/regresar.svg" alt="home" class="sidebar_icon" width="35px" height="35px"><div class="sidebar_hide"><p class="sidebar_text">Inicio</p></div></li></a>
+                <a href="/base_de_datos"><li class="sidebar_element"><img src="../assets/icons/datos-black.png" alt="estadisticas" class="sidebar_icon" width="20px" height="30px"><div class="sidebar_hide"><p class="sidebar_text">Base de datos</p></div></li></a>
+                <a href="/comunidades"><li class="sidebar_element"><img src="../assets/icons/vista rapida-black.png" alt="informe" class="sidebar_icon" width="30px" height="30px"><div class="sidebar_hide"><p class="sidebar_text">Jerarquia</p></div></li></a>
+                <a href="/filtros"><li class="sidebar_element"><i class="bi bi-pie-chart-fill sidebar_icon" style="font-size: 1.5rem; text-align: center; color: #000;"></i><div class="sidebar_hide"><p class="sidebar_text">Estadísticas</p></div></li></a>
+                <a href="/historia"><li class="sidebar_element"><img src="../assets/icons/historial.svg" alt="informe" class="sidebar_icon" width="30px" height="30px"><div class="sidebar_hide"><p class="sidebar_text">Historial</p></div></li></a>
+                <a href="/calendario"><li class="sidebar_element"><img src="../assets/icons/calendario.svg" alt="calendario" class="sidebar_icon" width="30px" height="30px"><div class="sidebar_hide"><p class="sidebar_text">Calendario</p></div></li></a>           
+                <a href="/galeria"><li class="sidebar_element"><img src="../assets/icons/galeria.svg" alt="galeria" class="sidebar_icon" width="30px" height="30px"><div class="sidebar_hide"><p class="sidebar_text">Galeria</p></div></li></a>
+                <a href="/listado_votantes"><li class="sidebar_element"><img src="../assets/icons/cuaderno-votacion.svg" alt="votantes" class="sidebar_icon" width="30px" height="30px"><div class="sidebar_hide"><p class="sidebar_text">Listado de Votantes</p></div></li></a>
+                <a href="/importar"><li class="sidebar_element"><img src="../assets/icons/importar.png" alt="importar" class="sidebar_icon" width="30px" height="30px"><div class="sidebar_hide"><p class="sidebar_text">Importar Datos</p></div></li></a>
+            </ul>
+        </aside>
+    </div>
+
+    <!-- Navegación Superior -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand nav-link text-white" href="/">
+                <i class="bi bi-cpu-fill text-warning me-1"></i> Octava Estrella
+            </a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="person-card shadow">
+            <!-- Banner Superior -->
+            <header class="header-gradient">
+                <h1 id="household-title" class="mb-0 fw-bold"><i class="bi bi-house-gear-fill me-2"></i> Cargando datos del hogar...</h1>
+                <p class="subtitle">Registro y actualización del censo comunitario</p>
+            </header>
+
+            <div class="p-4 p-md-5">
+                <!-- SECCIÓN 1: DATOS DE LA VIVIENDA -->
+                <section class="mb-5">
+                    <h4 class="section-title"><i class="bi bi-geo-alt-fill me-2 text-primary"></i>1. Ubicación y Datos de la Vivienda</h4>
+                    <div id="housing-form-container" class="row g-3 p-3 bg-light rounded border"></div>
+                </section>
+
+                <!-- SECCIÓN 2: INTEGRANTES DEL NÚCLEO FAMILIAR -->
+                <section>
+                    <div class="d-flex justify-content-between align-items-center section-title">
+                        <h4 class="mb-0"><i class="bi bi-people-fill me-2 text-primary"></i>2. Integrantes del Núcleo Familiar</h4>
+                        <button class="btn btn-primary shadow-sm" id="add-person-btn"><i class="bi bi-person-plus-fill me-2"></i>Agregar Miembro</button>
+                    </div>
+                    <div id="members-form-container"></div>
+                </section>
+
+                <div class="mt-4 pt-3 border-top d-flex justify-content-end">
+                    <button class="btn btn-success btn-lg shadow-sm w-100 w-md-auto" id="save-changes-btn">
+                        <i class="bi bi-check-circle-fill me-2"></i>Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+$(document).ready(function() {
+    const params = new URLSearchParams(window.location.search);
+    const isEditMode = window.location.pathname.includes('editar-hogar');
+    
+    const housingContainer = $('#housing-form-container');
+    const membersContainer = $('#members-form-container');
+    
+    let allHeaders = [];
+
+    // Clasificación de campos por sección
+    const housingHeadersKeys = [
+        'COMUNIDAD', 'TORRE', 'NUMERO DE CASA / APTO', 'CASA', 
+        'CONDICION DE VIVIENDA', 'CONDICIÓN DE VIVIENDA', 'ESTADO DEL OCUPANTE', 
+        'PESO DE BOMBONA', 'FECHA DE INGRESO', 
+
+    ];
+
+    const camposObligatorios = [
+        'NOMBRE COMPLETO', 'CEDULA DE IDENTIDAD', 'EDAD',
+        'COMUNIDAD', 'TORRE', 'NUMERO DE CASA / APTO'
+    ];
+
+    function isHousingHeader(header) {
+                return housingHeadersKeys.includes(header.toUpperCase());
+    }
+
+    // Helper para generar inputs dinámicos con formato
+    function buildFieldHtml(header, value, isDisabled) {
+        const hUpper = header.toUpperCase();
+        let inputHtml = '';
+
+        const buildSelect = (options) => {
+            let html = `<select class="form-select border-primary" data-key="${header}" ${isDisabled}>\n<option value="">Seleccione...</option>\n`;
+            options.forEach(opt => {
+                let isSelected = (String(value).trim().toUpperCase() === String(opt).toUpperCase()) ? 'selected' : '';
+                html += `<option value="${opt}" ${isSelected}>${opt}</option>\n`;
+            });
+            return html + `</select>`;
+        };
+
+        if (hUpper.includes('FECHA')) {
+            inputHtml = `<input type="date" class="form-control border-primary" data-key="${header}" value="${value}" ${isDisabled}>`;
+        } 
+        else if (hUpper.includes('CORREO')) {
+            inputHtml = `
+                <input type="email" class="form-control border-primary" data-key="${header}" value="${value}" placeholder="ejemplo@correo.com" ${isDisabled}>
+                <div class="invalid-feedback">Ingrese un correo válido.</div>`;
+        } 
+        else if (hUpper.includes('TELÉFONO') || hUpper.includes('TELEFONO')) {
+            inputHtml = `
+                <input type="text" class="form-control border-primary" data-key="${header}" value="${value}" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ej: 04121234567" ${isDisabled}>
+                <div class="invalid-feedback">El teléfono debe tener 11 números.</div>`;
+        }
+        else if (hUpper.includes('CEDULA') || hUpper.includes('CÉDULA')) {
+            inputHtml = `
+                <input type="text" class="form-control border-primary" data-key="${header}" value="${value}" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Ej: 12345678" ${isDisabled}>
+                <div class="invalid-feedback">La cédula debe tener entre 6 y 9 números.</div>`;
+        }
+        else if (hUpper === 'EDAD') {
+            inputHtml = `
+                <input type="number" class="form-control border-primary" data-key="${header}" value="${value}" min="0" max="120" oninput="if(this.value > 120) this.value = 120; if(this.value < 0) this.value = 0;" ${isDisabled}>
+                <div class="invalid-feedback">La edad debe estar entre 0 y 120 años.</div>`;
+        }
+        else if (['¿EMBARAZADA?', '¿LACTANTE 0 - 11 MESES?'].includes(hUpper)) {
+            inputHtml = buildSelect(['SI', 'NO']);
+        } 
+        else if (hUpper.includes('GENERO') || hUpper.includes('GÉNERO')) {
+            inputHtml = buildSelect(['M', 'F']);
+        }
+        else if (hUpper === 'PARENTESCO') {
+            inputHtml = buildSelect(['JEFE/A DE FAMILIA', 'CONYUGE', 'PADRE/MADRE', 'HIJO/A', 'ABUELO/A', 'NIETO/A', 'HERMANO/A','PRIMO/A', 'SOBRINO/A','SUEGRO/A']);
+        }
+        else if (hUpper === 'ESTADO CIVIL') {
+            inputHtml = buildSelect(['SOLTERO/A', 'CASADO/A', 'DIVORCIADO/A','VIUDO/A']);
+        }
+        else if (hUpper === 'NIVEL EDUCATIVO') {
+            inputHtml = buildSelect(['PREESCOLAR', 'PRIMARIA', 'SECUNDARIA', 'BACHILLER', 'UNIVERSITARIO', 'TECNICO MEDIO', 'TECNICO SUPERIOR', 'MAESTRIA', 'DOCTORADO', 'POSTGRADO', 'NO INDICA']);
+        }
+        else if (hUpper === 'COMUNIDAD') {
+            inputHtml = buildSelect(['19A', '19B', '19C', '20A', '20B', 'MZA', 'RUBI', 'YOCO', 'ENSE', 'SIPAO']);
+        }
+        else if (hUpper === 'TORRE' || hUpper.includes('TORRE') || hUpper.includes('BLOQUE')) {
+            inputHtml = buildSelect([
+                '1', '2', '3', '4', '5', '6', '7', '8',
+                '15', '16', '17', '18', '25',
+                'UNICA'
+            ]);
+        }
+        else if (hUpper.includes('CONDICION DE VIVIENDA') || hUpper.includes('CONDICIÓN DE VIVIENDA')) {
+            inputHtml = buildSelect(['PROPIA', 'DE UN FAMILIAR', 'ALQUILADA', 'VISITANTE']);
+        }
+        else if (hUpper.includes('ESTADO DE OCUPANTE') || hUpper.includes('ESTADO OCUPANTE')) {
+            inputHtml = buildSelect(['ACTIVO', 'IRREGULAR', 'AUSENTE']);
+        }
+        else if (hUpper.includes('BOMBONA')) {
+            inputHtml = buildSelect(['NO POSEE', '10 KG', '18 KG', '43 KG', 'GAS DIRECTO']);
+        }
+        // CENTRO DE VOTACIÓN (Formato Estado/Ciudad/Parroquia/Municipio)
+        else if (hUpper.includes('CENTRO DE VOTACIÓN') || hUpper.includes('CENTRO DE VOTACION')) {
+            inputHtml = `
+                <input type="text" class="form-control border-primary" data-key="${header}" value="${value}" 
+                       placeholder="Estado/Ciudad/Parroquia/Municipio" 
+                       pattern="^[^/]+/[^/]+/[^/]+/[^/]+$" 
+                       title="Ingrese el formato estricto de Estado/Ciudad/Parroquia/Municipio separado por barras diagonales (/)" ${isDisabled}>
+                <div class="invalid-feedback">Formato requerido: Estado/Ciudad/Parroquia/Municipio</div>`;
+        }
+        else if (hUpper.includes('ENFERMEDAD')) {
+            inputHtml = buildSelect([
+                'Ninguna', 'Hipertensión', 'Apnea de sueño', 'Enfermedad cardiovascular', 
+                'Enfermedad musculo-esquelética', 'Diabetes', 'Asma', 'Hiperplasia prostática', 
+                'Enfermedad mental', 'Tiroides y problemas hormonales', 'Lupus', 
+                'Artritis / Artrosis', 'Enfermedad renal', 'Trastorno gastrointestinal', 
+                'Alergias', 'Cáncer', 'Glaucoma', 'Parkinson', 'Otro'
+            ]);
+        }
+        else if (hUpper.includes('BENEFICIOS')) {
+            inputHtml = buildSelect([
+                'NINGUNO', 'JUBILACIÓN', 'PENSIÓN', 'CARNET DE LA PATRIA', 'OTRO'
+            ]);
+        }
+
+        else {
+            inputHtml = `<input type="text" class="form-control border-primary" data-key="${header}" value="${value}" ${isDisabled}>`;
+        }
+
+        const reqStar = camposObligatorios.includes(hUpper) ? '<span class="text-danger fw-bold">*</span>' : '';
+        return `
+            <div class="col-md-4">
+                <label class="form-label fw-semibold text-secondary small mb-1">${header} ${reqStar}</label>
+                ${inputHtml}
+            </div>`;
+    }
+
+    // Renderiza la Sección 1 (Datos únicos de la Vivienda)
+    function renderHousingSection(housingData) {
+        housingContainer.empty();
+        allHeaders.forEach(header => {
+            if (isHousingHeader(header)) {
+                const value = housingData[header] ? String(housingData[header]).replace(/"/g, '&quot;') : '';
+                let isDisabled = isEditMode && ['COMUNIDAD', 'TORRE', 'NUMERO DE CASA / APTO'].includes(header.toUpperCase()) ? 'disabled' : '';
+                housingContainer.append(buildFieldHtml(header, value, isDisabled));
+            }
+        });
+    }
+
+    // Renderiza cada miembro en la Sección 2 (Integrantes)
+    function createMemberForm(personData, index) {
+        const personId = personData['__row'] || `new_${Date.now()}`;
+        let formHtml = `
+            <div class="person-form mb-4 p-3 border rounded bg-light" data-row="${personId}">
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                    <h5 class="fw-bold text-secondary mb-0">Familiar #${index + 1}</h5>
+                    <button class="btn btn-sm btn-outline-danger remove-person-btn"><i class="bi bi-trash-fill"></i> Remover</button>
+                </div>
+                <div class="row g-3">`;
+
+        allHeaders.forEach(header => {
+            if (!isHousingHeader(header) && header.toUpperCase() !== '__ROW') {
+                const value = personData[header] ? String(personData[header]).replace(/"/g, '&quot;') : '';
+                formHtml += buildFieldHtml(header, value, '');
+            }
+        });
+
+        formHtml += '</div></div>';
+        membersContainer.append(formHtml);
+    }
+
+    membersContainer.on('click', '.remove-person-btn', function() {
+        if (!confirm('¿Remover a este integrante de la lista?')) return;
+        $(this).closest('.person-form').remove();
+        Toastify({ text: "Integrante removido", backgroundColor: "orange" }).showToast();
+    });
+
+    $.getJSON("/api/excel/columns", function(headers) {
+        allHeaders = headers;
+        
+        if (isEditMode) {
+            const comunidad = params.get('comunidad'), torre = params.get('torre'), casa = params.get('casa');
+            $('#household-title').html(`<i class="bi bi-house-gear-fill me-2"></i> Editando Hogar: ${comunidad} - Torre ${torre} - Casa ${casa}`);
+            
+            $.getJSON(`/api/get-household-details?comunidad=${comunidad}&torre=${torre}&casa=${casa}`, function(household) {
+                if (household && household.length > 0) {
+                    renderHousingSection(household[0]);
+                    membersContainer.empty();
+                    household.forEach((person, idx) => createMemberForm(person, idx));
+                } else {
+                    renderHousingSection({ 'Comunidad': comunidad, 'Torre': torre, 'Numero de casa / apto': casa });
+                    createMemberForm({}, 0);
+                }
+            });
+        } else {
+            $('#household-title').html(`<i class="bi bi-house-add-fill me-2"></i> Agregar Nuevo Núcleo Familiar`);
+            renderHousingSection({});
+            createMemberForm({}, 0);
+        }
+    });
+
+    $('#add-person-btn').on('click', function() {
+        const count = $('.person-form').length;
+        createMemberForm({}, count);
+    });
+
+    $('#save-changes-btn').on('click', function() {
+        let isValid = true;
+        $('.is-invalid').removeClass('is-invalid');
+        $('.dinamic-feedback').remove();
+
+        // 1. Recolectar datos de Vivienda (Sección 1)
+        let housingData = {};
+        housingContainer.find('input, select').each(function() {
+            const field = $(this);
+            const key = field.data('key');
+            const keyUpper = String(key).toUpperCase();
+            const val = field.val();
+
+            if (camposObligatorios.includes(keyUpper) && (!val || val.trim() === "")) {
+                field.addClass('is-invalid');
+                field.after('<div class="invalid-feedback dinamic-feedback">Campo obligatorio.</div>');
+                isValid = false;
+            }
+            housingData[key] = val || "";
+        });
+
+        // 2. Recolectar datos de Integrantes (Sección 2) y fusionar con Vivienda
+        let payload = [];
+        $('.person-form').each(function() {
+            const memberForm = $(this);
+            let personData = { ...housingData, '__row': memberForm.data('row').toString() };
+
+            memberForm.find('input, select').each(function() {
+                const field = $(this);
+                const key = field.data('key');
+                const keyUpper = String(key).toUpperCase();
+                const val = field.val();
+
+                if (camposObligatorios.includes(keyUpper) && (!val || val.trim() === "")) {
+                    field.addClass('is-invalid');
+                    field.after('<div class="invalid-feedback dinamic-feedback">Campo obligatorio.</div>');
+                    isValid = false;
+                }
+
+                // Validaciones de formato
+                if (keyUpper.includes('CORREO') && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                    field.addClass('is-invalid');
+                    isValid = false;
+                }
+                if ((keyUpper.includes('TELÉFONO') || keyUpper.includes('TELEFONO')) && val && val.length !== 11) {
+                    field.addClass('is-invalid');
+                    isValid = false;
+                }
+                if ((keyUpper.includes('CEDULA') || keyUpper.includes('CÉDULA')) && val && (val.length < 6 || val.length > 9)) {
+                    field.addClass('is-invalid');
+                    isValid = false;
+                }
+
+                if (keyUpper === 'EDAD' && val) {
+                    const edadVal = parseInt(val, 10);
+                    if (isNaN(edadVal) || edadVal < 0 || edadVal > 120) {
+                        field.addClass('is-invalid');
+                        isValid = false;
+                    }
+                }
+
+                personData[key] = val || "";
+            });
+            payload.push(personData);
+        });
+
+        if (!isValid) {
+            Toastify({ text: "Revise las casillas marcadas en rojo.", backgroundColor: "red" }).showToast();
+            return;
+        }
+
+        const bodyData = {
+            comunidad: params.get('comunidad') || housingData['Comunidad'] || "",
+            torre: params.get('torre') || housingData['Torre'] || "",
+            casa: params.get('casa') || housingData['Numero de casa / apto'] || housingData['Casa'] || "",
+            datos: payload
+        };
+
+        fetch("/api/update-excel", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodyData)
+        }).then(res => {
+            if (res.ok) {
+                Toastify({ text: "¡Cambios guardados exitosamente!", backgroundColor: "green" }).showToast();
+                setTimeout(() => window.location.href = '/comunidades', 1500);
+            } else {
+                Toastify({ text: "Error en el servidor al guardar.", backgroundColor: "red" }).showToast();
+            }
+        }).catch(() => {
+            Toastify({ text: "Error de red al intentar guardar.", backgroundColor: "red" }).showToast();
+        });
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <title>Octava Estrella</title>
+
+    <!-- Bootstrap CSS principal -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/Navs&Headers.css">
+
+</head>
+<style>
+    * {
+        margin: 0px;
+        padding: 0px;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    *::before, *::after {
+        content: "";
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        line-height: 1.2;
+        color: #fff;
+    }
+
+    @keyframes aparecer {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background-image: linear-gradient(120deg, #3b82f6, #1145b4);
+        position: relative;
+    }
+
+    /* EFECTOS HOVER DE FONDO PARA CADA BOTÓN */
+    /*Base de Datos*/
+    body:has(.content-btn a:nth-child(1):hover)::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(120deg, #1ab49c, #0da08a);
+        z-index: -1; animation: aparecer 0.5s forwards;
+    }
+    /*Jerarquia Habitacional*/
+    body:has(.content-btn a:nth-child(2):hover)::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(120deg,#dd7a00, darkorange);
+        z-index: -1; animation: aparecer 0.5s forwards;
+        
+    }
+    /*Dashboard*/
+    body:has(.content-btn a:nth-child(3):hover)::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(120deg, #5d2c6c, #441752);
+        z-index: -1; animation: aparecer 0.5s forwards;
+    }
+    /*Historial*/
+    body:has(.content-btn a:nth-child(4):hover)::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(120deg, rgb(42, 170, 42), green);
+        z-index: -1; animation: aparecer 0.5s forwards;
+    }
+    /*Calendario*/
+    body:has(.content-btn a:nth-child(5):hover)::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(120deg, rgb(218, 0, 0), rgb(248, 56, 56));
+        z-index: -1; animation: aparecer 0.5s forwards;
+    }
+    /*Galeria*/
+    body:has(.content-btn a:nth-child(6):hover)::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(120deg, rgb(170, 46, 193), rgb(114, 0, 134));
+        z-index: -1; animation: aparecer 0.5s forwards;
+    }
+    /*Listado de Votantes*/
+    body:has(.content-btn a:nth-child(7):hover)::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(120deg, #0f172a, #312e81);
+        z-index: -1; animation: aparecer 0.5s forwards;
+    }
+    /*Importar Datos*/
+    body:has(.content-btn a:nth-child(8):hover)::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(120deg, #0284c7, #0369a1);
+        z-index: -1; animation: aparecer 0.5s forwards;
+    }
+
+    main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        padding: min(6em, 2%);
+        min-height: 86vh;
+        gap: 4%;
+    }
+    /* Corrección de alineación del Navbar */
+    .navbar .container {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    .navbar-brand {
+        margin-right: auto !important;
+        text-align: left !important;
+    }
+
+    /* TEXTO MOSTRADO SEGÚN EL BOTÓN EN HOVER */
+    main:has(.content-btn a:nth-child(1):hover) .content-tex p:nth-child(1) { opacity: 1; }
+    main:has(.content-btn a:nth-child(2):hover) .content-tex p:nth-child(2) { opacity: 1; }
+    main:has(.content-btn a:nth-child(3):hover) .content-tex p:nth-child(3) { opacity: 1; }
+    main:has(.content-btn a:nth-child(4):hover) .content-tex p:nth-child(4) { opacity: 1; }
+    main:has(.content-btn a:nth-child(5):hover) .content-tex p:nth-child(5) { opacity: 1; }
+    main:has(.content-btn a:nth-child(6):hover) .content-tex p:nth-child(6) { opacity: 1; }
+    main:has(.content-btn a:nth-child(7):hover) .content-tex p:nth-child(7) { opacity: 1; }
+    main:has(.content-btn a:nth-child(8):hover) .content-tex p:nth-child(8) { opacity: 1; }
+
+    .wapper-hero {
+        width: 100%;
+        transform: translateY(-10%);
+    }
+
+    .hero div {
+        width: fit-content;
+        margin: auto;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #fff;
+        text-align: center;
+    }
+
+    .wapper-btn {
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.95);
+        color: #333;
+        border-radius: 1rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        text-align: center;
+        padding: 2.5rem;
+    }
+
+    .wapper-btn h1 {
+        color: inherit;
+        font-size: 3rem;
+        font-weight: 700;
+    }
+
+    .wapper-btn p {
+        opacity: 0.8;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    /* BOTONERA PRINCIPAL: FORZADA A 4 COLUMNAS EN ESCRITORIO */
+    .content-btn {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 15px;
+    }
+
+    .content-btn a {
+        text-decoration: none;
+        display: block;
+    }
+
+    .content-btn button {
+        width: 100%;   
+        height: 130px;
+        padding: .5em;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-align: center;
+        color: #212529; 
+        border: 1px solid #ba9501;
+        background-color: #e3b707;
+        border-radius: 0.5rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.075);
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .content-btn button:hover {
+        background-color: #eab308;
+        transform: translateY(-2px);
+        color: #000;
+    }
+
+    .content-tex {
+        width: 100%;
+        position: relative;
+    }
+
+    .content-tex p {
+        position: absolute;
+        color: #fff;
+        text-align: center;
+        font-size: 1.5rem;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        width: 100%;
+    }
+
+    /* SECCIÓN INFERIOR DE FUNCIONES (4 COLUMNAS) */
+    section#funciones {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 1.5rem;
+        width: 100%;
+        padding: 4rem 5%;
+        background: #f8f9fa;
+        color: #333;
+        scroll-margin-top: 70px;
+    }
+
+    section article {
+        text-align: center;
+        padding: 1rem 0rem;
+        transition: transform 0.2s;
+    }
+
+    section article:hover { 
+        transform: translateY(-5px); 
+    }
+
+    section article h5 {
+        font-size: 1.25rem;
+        margin-bottom: .5rem;
+        font-weight: 500;
+        color: inherit;
+    }
+
+    section article p {
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+
+    .content-btn::before,
+    section#funciones::before {
+        content: none !important;
+        display: none !important;
+    }
+
+    footer {
+        background: #212529;
+        color: #aaa;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    footer a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    /* PANEL DE SINCRONIZACIÓN */
+    .sync-card {
+        background: rgba(240, 244, 248, 0.9);
+        border-radius: 0.75rem;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        text-align: left;
+        font-size: 0.9rem;
+    }
+
+    .sync-card h6 {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sync-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+        border-radius: 0.25rem;
+        color: #fff;
+    }
+
+    .sync-badge.success { background-color: #198754; }
+    .sync-badge.warning { background-color: #ffc107; color: #000; }
+    .sync-badge.danger { background-color: #dc3545; }
+
+    .sync-details {
+        font-size: 0.8rem;
+        color: #555;
+        margin-top: 0.5rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .sync-btn {
+        background-color: #0d6efd;
+        border: none;
+        color: white;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-top: 0.75rem;
+    }
+
+    .sync-btn:hover { background-color: #0b5ed7; }
+    .sync-btn:disabled { background-color: #6c757d; cursor: not-allowed; }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .spinner-animate {
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+
+    /* MEDIA QUERIES (DESNESTADAS Y ORDENADAS) */
+    @media screen and (max-width: 1200px) {
+        .content-btn {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+        section#funciones {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    @media screen and (max-width: 1030px) {
+        main {
+            flex-direction: column;
+            align-items: center;
+        }
+        .wapper-hero {
+            transform: none;
+            margin-bottom: 2rem;
+        }
+    }
+
+    @media screen and (max-width: 600px) {
+        .content-btn {
+            grid-template-columns: 1fr !important;
+        }
+        section#funciones {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    .hero h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        background: linear-gradient(180deg, #fff7ed 0%, #fef08a 35%, #eab308 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.5));
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+
+</style>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand nav-link text-white" href="/">
+                <i class="bi bi-cpu-fill text-warning me-1"></i>Octava Estrella
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+    
+    <main>
+        <div class="wapper-hero">
+            <div class="hero">
+                <div>
+                    <img src="/assets/logo/logo.png" alt="logo" width="200px" height="190.23px">
+                </div>
+                <h1>Octava Estrella de Guayana</h1>
+            </div>
+        
+            <div class="content-tex">
+                <p>Gestiona y administra la información de los miembros de tu comunidad de forma sencilla. Filtra, busca y actualiza registros con facilidad y seguridad.</p>
+                <p>Se encarga de recopilar y presentar de forma resumida los datos clave de una comunidad (nucleos familiares, comunidad, N° de casa/apartamento, etc.)</p>
+                <p>Permite a los equipos documentar, clasificar y rastrear cada modificación, característica nueva y corrección de errores de forma centralizada.</p>
+                <p>Organiza y consulta eventos, reuniones y actividades comunitarias. Recibe recordatorios y mantente al día con lo que sucede en tu comunidad.</p>
+                <p>Guarda y comparte imágenes de eventos, actividades y situaciones importantes de la comunidad. Mantén un registro visual de la historia local.</p>
+                <p>Ofrece una radiografía instantánea de la comunidad a través de gráficos detallados que abarcan demografía, salud, socioeconomía, servicios y distribución territorial</p>
+                <p>Consulta y gestiona el censo de residentes mayores de 16 años habilitados para participar en los procesos electorales de la comunidad.</p>
+                <p>Permite importar datos desde archivos Excel para actualizar o agregar información a la base de datos de la comunidad.</p>
+            </div>
+        </div>
+
+        <div class="wapper-btn">
+            <h1>Bienvenido</h1>
+            <p>Gestiona tu comunidad de manera fácil e intuitiva</p>
+
+            <!-- CONTENEDOR DINÁMICO DE ESTADO DE SINCRONIZACIÓN -->
+            <div id="sync-panel"></div>
+            
+            <div class="content-btn">
+                <a href="/base_de_datos"><button>Base De Datos</button></a>
+                <a href="/comunidades"><button>Jerarquia Habitacional</button></a>
+                <a href="/filtros"><button>Estadísticas</button></a>
+                <a href="/historia"><button>Historial</button></a>
+                <a href="/calendario"><button>Calendario</button></a>
+                <a href="/galeria"><button>Galeria</button></a>
+                <a href="/listado_votantes"><button>Listado de Votantes</button></a>
+                <a href="/importar"><button>Importar Datos</button></a>
+            </div>
+        </div>
+    </main>
+
+    <section id="funciones">
+        <article>
+            <img src="/assets/icons/datos.png" alt="base de datos" width="36px" height="36px">
+            <h5>Base de Datos</h5>
+            <p>Gestiona y administra la información de los miembros de tu comunidad de forma sencilla. Filtra, busca y actualiza registros con facilidad y seguridad.</p>
+        </article>
+
+        <article>
+            <img src="/assets/icons/calendario.png" alt="calendario" width="36px" height="36px">
+            <h5>Calendario</h5>
+            <p>Organiza y consulta eventos, reuniones y actividades comunitarias. Recibe recordatorios y mantente al día con lo que sucede en tu comunidad.</p>
+        </article>
+
+        <article>
+            <img src="/assets/icons/galeria.png" alt="galeria" width="36px" height="36px">
+            <h5>Galería</h5>
+            <p>Guarda y comparte imágenes de eventos, actividades y situaciones importantes de la comunidad. Mantén un registro visual de la historia local.</p>
+        </article>
+
+        <article>
+            <img src="/assets/icons/vista rapida.png" alt="vista rapida" width="36px" height="36px">
+            <h5>Jerarquia Habitacional</h5>
+            <p>Se encarga de recopilar y presentar de forma resumida los datos clave de una comunidad (nucleos familiares, comunidad, N° de casa/apartamento, etc.)</p>
+        </article>
+
+        <article>
+            <img src="/assets/icons/historial.png" alt="historial" width="36px" height="36px">
+            <h5>Historial</h5>
+            <p>Permite a los equipos documentar, clasificar y rastrear cada modificación, característica nueva y corrección de errores de forma centralizada.</p>
+        </article>
+
+        <article>
+            <i class="bi bi-pie-chart-fill sidebar_icon" style="font-size: 1.5rem; text-align: center; color: #e3b707;"></i>
+            <h5>Estadísticas</h5>
+            <p>Ofrece una radiografía instantánea de la comunidad a través de gráficos detallados que abarcan demografía, salud, socioeconomía, servicios y distribución territorial</p>
+        </article>
+
+        <article>
+            <img src="/assets/icons/cuadero.png" alt="votantes" width="36px" height="36px">
+            <h5>Listado de Votantes</h5>
+            <p>Permite a los equipos documentar, clasificar y rastrear cada modificación, característica nueva y corrección de errores de forma centralizada.</p>
+        </article>
+
+        <article>
+            <img src="/assets/icons/importar 2.png" alt="importar" width="36px" height="36px">
+            <h5>Importar Datos</h5>
+            <p>Permite importar datos desde archivos Excel para actualizar o agregar información a la base de datos de la comunidad.</p>
+        </article>
+    </section>
+    
+    <footer id="contacto">
+        © 2025 Consejo Comunal Octava Estrella de Guayana —
+        <a href="mailto:info@rioaro.org">Contacto</a>
+    </footer>
+
+    <!-- LOGICA DE CONTROL DE SINCRONIZACIÓN -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const syncPanel = document.getElementById("sync-panel");
+
+            function checkSyncStatus() {
+                syncPanel.innerHTML = `
+                    <div class="sync-card" style="text-align: center; padding: 1.5rem;">
+                        <i class="bi bi-arrow-repeat spinner-animate text-primary" style="font-size: 1.5rem; display: inline-block;"></i>
+                        <span style="margin-left: 0.5rem; color: #555; font-size: 0.9rem; vertical-align: middle;">Verificando estado de la base de datos...</span>
+                    </div>
+                `;
+
+                fetch("/api/sync-status")
+                    .then(response => {
+                        if (!response.ok) throw new Error("Error en respuesta");
+                        return response.json();
+                    })
+                    .then(data => {
+                        let badgeClass = "warning";
+                        let statusText = data.status;
+                        let syncButtonHtml = "";
+
+                        if (data.synced) {
+                            badgeClass = "success";
+                        } else if (data.error_connecting) {
+                            badgeClass = "danger";
+                            syncButtonHtml = `<button class="sync-btn" id="btn-sync-retry"><i class="bi bi-arrow-clockwise"></i> Reintentar Conexión</button>`;
+                        } else {
+                            badgeClass = "warning";
+                            syncButtonHtml = `<button class="sync-btn" id="btn-sync-now"><i class="bi bi-cloud-download"></i> Descargar Última Versión</button>`;
+                        }
+
+                        const localRev = data.local_rev ? data.local_rev.substring(0, 12) : "Desconocida";
+                        const remoteRev = data.remote_rev ? data.remote_rev.substring(0, 12) : "Desconocida";
+                        const localSizeKB = data.local_exists ? (data.local_size / 1024).toFixed(1) : "0.0";
+
+                        syncPanel.innerHTML = `
+                            <div class="sync-card">
+                                <h6>
+                                    <i class="bi bi-cloud-check-fill" style="color: #2563eb; font-size: 1.2rem;"></i> 
+                                    Estado del Censo: 
+                                    <span class="sync-badge ${badgeClass}">${statusText}</span>
+                                </h6>
+                                <div class="sync-details">
+                                    <div><strong>Versión Local (Rev):</strong> <code style="color: #0d6efd; font-weight:bold;">${localRev}</code></div>
+                                    <div><strong>Versión en Nube (Rev):</strong> <code style="color: #198754; font-weight:bold;">${remoteRev}</code></div>
+                                    <div><strong>Tamaño Local:</strong> ${localSizeKB} KB</div>
+                                    <div><strong>Última Sincronización:</strong> ${data.local_mtime || 'Nunca'}</div>
+                                </div>
+                                ${syncButtonHtml}
+                            </div>
+                        `;
+
+                        const btnSyncNow = document.getElementById("btn-sync-now");
+                        if (btnSyncNow) {
+                            btnSyncNow.addEventListener("click", triggerSync);
+                        }
+                        const btnSyncRetry = document.getElementById("btn-sync-retry");
+                        if (btnSyncRetry) {
+                            btnSyncRetry.addEventListener("click", checkSyncStatus);
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        syncPanel.innerHTML = `
+                            <div class="sync-card" style="border-left: 4px solid #dc3545;">
+                                <h6 style="color: #dc3545;"><i class="bi bi-exclamation-triangle-fill"></i> Error de conexión con el servidor</h6>
+                                <p style="font-size: 0.8rem; margin: 0.5rem 0; color: #555;">No se pudo obtener el estado de sincronización. Asegúrese de que el backend esté ejecutándose correctamente.</p>
+                                <button class="sync-btn" id="btn-sync-retry-catch"><i class="bi bi-arrow-clockwise"></i> Reintentar</button>
+                            </div>
+                        `;
+                        document.getElementById("btn-sync-retry-catch").addEventListener("click", checkSyncStatus);
+                    });
+            }
+
+            function triggerSync() {
+                const btn = document.getElementById("btn-sync-now");
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<i class="bi bi-arrow-repeat spinner-animate"></i> Sincronizando...`;
+                }
+
+                fetch("/api/sync-force", { method: "POST" })
+                    .then(res => {
+                        if (res.ok) {
+                            checkSyncStatus();
+                        } else {
+                            alert("No se pudo completar la descarga forzada.");
+                            checkSyncStatus();
+                        }
+                    })
+                    .catch(err => {
+                        alert("Error de comunicación de red al intentar descargar.");
+                        checkSyncStatus();
+                    });
+            }
+
+            // Iniciar la verificación al cargar
+            checkSyncStatus();
+        });
+    </script>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</body>
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importar Datos desde Excel</title>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
+    <link rel="stylesheet" href="/assets/css/Navs&Headers.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6) !important;
+            background-attachment: fixed !important;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container { max-width: 1300px; }
+
+        /* 1. Margen superior ampliado para despegar el contenedor de la navbar */
+        .content-card {
+            background: #ffffff !important;
+            border-radius: 1rem !important;
+            border: none !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+            overflow: hidden !important;
+            margin-top: 2.5rem !important; /* Cambiado de 0.5rem a 2.5rem */
+            margin-bottom: 2rem !important;
+            padding: 0 !important;
+        }
+
+        /* 2. Cabecera con un degradado Azul Océano / Cian distintivo */
+        .header-gradient {
+            background: linear-gradient(120deg, #0284c7, #0369a1) !important; 
+            color: white !important;
+            padding: 1.5rem 2rem !important;
+            border-radius: 1rem 1rem 0 0 !important;
+            margin-bottom: 0 !important;
+            text-align: left !important;
+        }
+
+        .header-gradient h1 {
+            color: white !important;
+            font-weight: bold !important;
+            font-size: 2rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        .header-gradient .subtitle {
+            color: rgba(255, 255, 255, 0.85) !important;
+            margin-bottom: 0 !important;
+            font-size: 1rem;
+        }
+
+        .accordion-button:not(.collapsed) { background-color: #e7f1ff; color: #0c63e4; font-weight: bold; }
+        .person-item { cursor: pointer; transition: background-color 0.2s; }
+        .person-item:hover { background-color: #f0f0f0; }
+        .action-buttons { display: none; } 
+
+        /* Estilos del Sidebar unificados */
+        .wapper-aside {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 10px;
+            height: 100%;
+            display: grid;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .wapper-aside:hover .sidebar {
+            transform: translateX(0);
+        }
+
+        .sidebar {
+            z-index: 101;
+            position: absolute;
+            background-color: white;
+            width: max-content;
+            border-radius: 10px;
+            padding: 2rem 1rem;
+            transform: translateX(-90%);
+            transition: transform .3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.30);
+        }
+
+        .sidebar:hover .sidebar_element {
+            grid-template-columns: 40px 1fr;
+        }
+
+        .sidebar_list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 0;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: .4rem;
+            justify-content: center;
+        }
+
+        .sidebar_list a {
+            text-decoration: none;
+        }
+
+        .sidebar_element {
+            padding: .8rem 1.3rem;
+            border-radius: 10px;
+            display: grid;
+            align-items: center;
+            grid-template-columns: 40px 0fr;
+            color: #526581;
+            transition: grid-template-columns .5s;
+        }
+
+        .sidebar_element:hover {
+            background-color: #e3b707;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .sidebar_element a {
+            text-decoration: none;
+            color: #526581;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .sidebar_element a:hover {
+            color: #fff;
+        }
+
+        .sidebar_icon {
+            width: 100%;
+            overflow: hidden;
+            justify-self: center;
+        }
+
+        .sidebar_text {
+            padding-left: 1.3rem;
+            text-wrap: nowrap;
+            font-size: 1.1rem;
+        }
+
+        .sidebar_hide {
+            overflow: hidden;
+        }
+
+        @media screen and (min-width: 1340px) and (max-width: 1360px) {
+            .sidebar { padding: 1rem .5rem; }
+            .sidebar_list { gap: .2rem; }
+            .sidebar_element { padding: .8rem .8rem; }
+        }
+
+        /* Indicadores de estado elegantes */
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-left: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .badge-nuevo { background-color: #d1fae5; color: #065f46; border: 1px solid #10b981; }
+        .badge-igual { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+        .badge-cambio { background-color: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+
+        /* Estilo para filas existentes sin cambios */
+        .person-igual { opacity: 0.7; }
+        .person-cambio { background-color: #fff9db !important; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Unificado -->
+    <div class="wapper-aside">
+        <aside class="sidebar">
+            <ul class="sidebar_list">
+                <a href="/">
+                    <li class="sidebar_element">
+                        <img src="/assets/icons/regresar.svg" alt="home" class="sidebar_icon" width="35px" height="35px">
+                        <div class="sidebar_hide">
+                            <p class="sidebar_text">Inicio</p>
+                        </div>
+                    </li>
+                </a>
+                <a href="/base_de_datos">
+                    <li class="sidebar_element">
+                        <img src="/assets/icons/datos-black.png" alt="estadisticas" class="sidebar_icon" width="20px" height="30px">
+                        <div class="sidebar_hide">
+                            <p class="sidebar_text">Base de datos</p>
+                        </div>
+                    </li>
+                </a>
+                <a href="/comunidades">
+                    <li class="sidebar_element">
+                        <img src="/assets/icons/vista rapida-black.png" alt="informe" class="sidebar_icon" width="30px" height="30px">
+                        <div class="sidebar_hide">
+                            <p class="sidebar_text">Jerarquia</p>
+                        </div>
+                    </li>
+                </a>
+                <a href="/filtros">
+                    <li class="sidebar_element">
+                        <i class="bi bi-pie-chart-fill sidebar_icon" style="font-size: 1.5rem; text-align: center; color: #000000;"></i>
+                        <div class="sidebar_hide">
+                            <p class="sidebar_text">Estadísticas</p>
+                        </div>
+                    </li>
+                </a>
+                <a href="/historia">
+                    <li class="sidebar_element">
+                        <img src="/assets/icons/historial.svg" alt="informe" class="sidebar_icon" width="30px" height="30px">
+                        <div class="sidebar_hide">
+                            <p class="sidebar_text">Historial</p>
+                        </div>
+                    </li>
+                </a>
+                <a href="/calendario">
+                    <li class="sidebar_element">
+                        <img src="/assets/icons/calendario.svg" alt="calendario" class="sidebar_icon" width="30px" height="30px">
+                        <div class="sidebar_hide">
+                            <p class="sidebar_text">Calendario</p>
+                        </div>
+                    </li>
+                </a>           
+                <a href="/galeria">
+                    <li class="sidebar_element">
+                        <img src="/assets/icons/galeria.svg" alt="galeria" class="sidebar_icon" width="30px" height="30px">
+                        <div class="sidebar_hide">
+                            <p class="sidebar_text">Galeria</p>
+                        </div>
+                    </li>
+                </a>
+                <a href="/listado_votantes">
+                    <li class="sidebar_element">
+                        <img src="/assets/icons/cuaderno-votacion.svg" alt="votantes" class="sidebar_icon" width="30px" height="30px">
+                        <div class="sidebar_hide">
+                            <p class="sidebar_text">Listado de Votantes</p>
+                        </div>
+                    </li>
+                </a>
+
+                <a href="/importar">
+                    <li class="sidebar_element">
+                        <img src="../assets/icons/importar.png" alt="importar" class="sidebar_icon" width="30px" height="30px">
+                        
+                        <div class="sidebar_hide">
+                            <p class="sidebar_text">Importar Datos</p>
+                        </div>
+                    </li>
+                </a>
+            </ul>
+        </aside>
+    </div>
+
+    <!-- Navegación Superior -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand nav-link text-white" href="/">
+                <i class="bi bi-cpu-fill text-warning me-1"></i>Octava Estrella
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="content-card shadow">
+            <!-- Cabecera Banner con Degradado -->
+            <header class="header-gradient">
+                <h1 class="mb-0 fw-bold"><i class="bi bi-cloud-arrow-up-fill me-2"></i> Importar Habitantes</h1>
+                <p class="subtitle">Selecciona un archivo Excel. El sistema verificará duplicados y te permitirá filtrar comunidades, torres o casas antes de importar.</p>
+            </header>
+
+            <div class="p-4 p-md-5">
+                <div class="mb-3">
+                    <label for="excel-file-input" class="form-label fw-bold">Seleccionar archivo Excel</label>
+                    <input class="form-control form-control-lg border-primary" type="file" id="excel-file-input" accept=".xlsx, .xls">
+                </div>
+
+                <div id="preview-container" class="mt-4">
+                    <div class="alert alert-info border-info text-center py-4">
+                        <i class="bi bi-file-earmark-excel fs-1 d-block mb-2"></i>
+                        Esperando archivo para la vista previa...
+                    </div>
+                </div>
+                
+                <div class="mt-4 d-flex justify-content-end gap-2 action-buttons" id="action-buttons-container">
+                    <button class="btn btn-warning btn-lg shadow-sm" id="delete-all-duplicates-btn" style="display: none;">
+                        <i class="bi bi-shield-x me-2"></i>Eliminar Todos los Duplicados
+                    </button>
+                    <button class="btn btn-primary btn-lg shadow-sm" id="import-btn">
+                        <i class="bi bi-check-circle-fill me-2"></i>Importar Datos Restantes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal para Editar Persona -->
+    <div class="modal fade" id="editPersonModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Editar Información</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div id="modal-form-fields" class="row g-3"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary" id="save-modal-changes-btn">Guardar Cambios</button></div></div></div></div>
+
+    <!-- Modal para Verificar Duplicados -->
+    <div class="modal fade" id="verificationModal" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Verificación de Duplicado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <div class="table-responsive bg-white rounded border shadow-sm">
+                        <table class="table table-bordered table-hover align-middle mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th style="width: 20%;" class="text-secondary">Campo de Datos</th>
+                                    <th style="width: 40%;"><i class="bi bi-database-check text-success"></i> Datos Existentes (Base de Datos)</th>
+                                    <th style="width: 40%;"><i class="bi bi-file-earmark-arrow-up text-primary"></i> Datos a Importar (Excel - Editable)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparison-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar (No guardar)</button>
+                    <button type="button" class="btn btn-primary" id="save-verification-changes-btn">
+                        <i class="bi bi-save"></i> Guardar Cambios de Importación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+$(document).ready(function() {
+    const fileInput = $('#excel-file-input');
+    const previewContainer = $('#preview-container');
+    const actionButtonsContainer = $('#action-buttons-container');
+    const importBtn = $('#import-btn');
+    let activeIndex = null;
+
+    let processedData = []; 
+    let activeUid = null;
+
+    fileInput.on('change', async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        previewContainer.html('<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-2">Analizando datos en el servidor...</p></div>');
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/preview-import', { method: 'POST', body: formData });
+            const result = await response.json();
+            
+            processedData = result.data.map((item, index) => ({
+                ...item,
+                uid: 'p-' + Date.now() + '-' + index // ID que no cambia aunque borremos otros
+            }));
+            
+            // Avisar si se quitaron duplicados internos
+            if (result.duplicados_omitidos > 0) {
+                Toastify({ text: `Se omitieron ${result.duplicados_omitidos} duplicados internos`, backgroundColor: "orange" }).showToast();
+            }
+
+            renderAccordion();
+            actionButtonsContainer.show();
+        } catch (error) {
+            Toastify({ text: "Error al procesar el archivo", backgroundColor: "red" }).showToast();
+        }
+    });
+
+    // Función para buscar valores en el objeto sin importar mayúsculas/minúsculas
+    function getVal(data, possibleKeys) {
+    for (let key in data) {
+        let cleanKey = key.toLowerCase().trim();
+        // Buscamos coincidencia parcial
+        if (possibleKeys.some(pk => cleanKey.includes(pk))) {
+            let val = String(data[key] || "").trim();
+            return val === "" ? "No asignado" : val; // En lugar de N/A, algo más claro
+        }
+    }
+    return "No asignado";
+}
+
+    function renderAccordion() {
+        if (processedData.length === 0) {
+            previewContainer.html('<div class="alert alert-warning text-center">Lista vacía.</div>');
+            actionButtonsContainer.hide();
+            return;
+        }
+
+        // 1. CAPTURAR QUÉ COMUNIDADES ESTÁN ABIERTAS (Por su nombre, no por ID numérico)
+        let openCommunityNames = [];
+        $('.accordion-collapse.show').each(function() {
+            // Buscamos el nombre de la comunidad en el botón del encabezado
+            let name = $(this).closest('.accordion-item').find('.community-name-text').text().trim();
+            if (name) openCommunityNames.push(name);
+        });
+
+        // 2. AGRUPAR
+        const grouped = {};
+        processedData.forEach((item) => {
+            const d = item.data;
+            const com = getVal(d, ["comunidad"]);
+            const torre = getVal(d, ["torre"]);
+            const casa = getVal(d, ["casa", "apto"]);
+            
+            if (!grouped[com]) grouped[com] = {};
+            if (!grouped[com][torre]) grouped[com][torre] = {};
+            if (!grouped[com][torre][casa]) grouped[com][torre][casa] = [];
+            
+            grouped[com][torre][casa].push(item);
+        });
+
+        // 3. CONSTRUIR HTML ORDENADO
+        let html = '<div class="accordion" id="importAccordion">';
+        
+        // Ordenar comunidades alfabéticamente para que no cambien de posición
+        const sortedCommunities = Object.keys(grouped).sort();
+
+        sortedCommunities.forEach((com, i) => {
+            const safeId = "com_" + com.replace(/[^a-z0-9]/gi, '_'); // ID basado en el nombre
+            const isOpen = openCommunityNames.includes(com);
+            
+            html += `
+            <div class="accordion-item shadow-sm mb-3 border-0">
+                <h2 class="accordion-header">
+                    <button class="accordion-button ${isOpen ? '' : 'collapsed'} rounded fw-bold" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#${safeId}">
+                        <i class="bi bi-buildings me-2 text-primary"></i> 
+                        Comunidad: <span class="community-name-text ms-1">${com}</span>
+                    </button>
+                </h2>
+                <div id="${safeId}" class="accordion-collapse collapse ${isOpen ? 'show' : ''}">
+                    <div class="accordion-body bg-white">`;
+
+            // Ordenar Torres
+            Object.keys(grouped[com]).sort().forEach(torre => {
+                html += `
+                <div class="bg-light p-2 mb-2 rounded border-start border-4 border-info">
+                    <h6 class="mb-0 text-secondary"><i class="bi bi-building me-1"></i> Torre: ${torre}</h6>
+                </div>`;
+
+                // Ordenar Casas
+                Object.keys(grouped[com][torre]).sort().forEach(casa => {
+                    html += `
+                    <div class="ms-3 mb-3">
+                        <p class="fw-bold text-primary mb-1" style="font-size: 0.85rem;">
+                            <i class="bi bi-door-closed-fill"></i> Casa/Apto: ${casa}
+                        </p>
+                        <ul class="list-group list-group-flush ms-3 border-start">`;
+
+                    grouped[com][torre][casa].forEach(item => {
+                        const d = item.data;
+                        const nombre = getVal(d, ["nombre"]);
+                        const cedula = getVal(d, ["cedula", "identidad"]);
+                        
+                        let badgeClass = item.status === 'nuevo' ? 'badge-nuevo' : 
+                                         (item.status === 'cambio' ? 'badge-cambio' : 'badge-igual');
+                        let badgeText = item.status === 'nuevo' ? 'Nuevo' : 
+                                        (item.status === 'cambio' ? 'Actualización' : 'Sin cambios');
+
+                        html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2 ${item.status === 'cambio' ? 'person-cambio' : ''}">
+                            <div class="person-row-click" data-uid="${item.uid}" style="flex: 1; cursor: pointer;">
+                                <span class="fw-bold">${nombre}</span> 
+                                <span class="status-badge ${badgeClass}">${badgeText}</span>
+                                <small class="text-muted d-block">C.I: ${cedula}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger border-0 delete-btn" data-uid="${item.uid}">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+                        </li>`;
+                    });
+                    html += `</ul></div>`;
+                });
+            });
+            html += `</div></div></div>`;
+        });
+
+        html += '</div>';
+        previewContainer.html(html);
+    }
+
+    // EVENTO BORRAR POR UID (No por índice)
+    previewContainer.on('click', '.delete-btn', function(e) {
+        e.stopPropagation();
+        const uid = $(this).data('uid');
+        processedData = processedData.filter(item => item.uid !== uid);
+        renderAccordion(); // La vista se mantiene estable gracias al ordenamiento y IDs fijos
+        Toastify({ text: "Habitante removido", backgroundColor: "#dc3545" }).showToast();
+    });
+
+    // EVENTO ABRIR MODAL POR UID
+    previewContainer.on('click', '.person-row-click', function() {
+        const uid = $(this).data('uid');
+        activeUid = uid; // <--- IMPORTANTE: Guardamos el UID aquí
+        
+        const item = processedData.find(p => p.uid === uid);
+        if (!item) return;
+
+        if (item.status === 'nuevo') {
+            showEditModal(item.data);
+        } else {
+            // Pasamos los datos de DB y los de Excel
+            showComparisonModal(item.db_data || {}, item.data);
+        }
+    });
+
+   function showComparisonModal(dbData, importData) {
+        let html = '';
+        
+        // Unimos todas las llaves posibles de ambos orígenes para no dejar nada fuera
+        const allKeys = Array.from(new Set([...Object.keys(dbData), ...Object.keys(importData)]));
+        
+        // Ordenamos alfabéticamente para que sea fácil de leer
+        allKeys.sort().forEach(key => {
+            // Ignoramos llaves internas de sistema
+            if (key.startsWith('__')) return;
+
+            const valDB = String(dbData[key] || "").trim();
+            const valImport = String(importData[key] || "").trim();
+            
+            // Solo marcamos cambio si el Excel trae algo REALMENTE diferente y no está vacío
+            const isDifferent = valImport !== "" && valDB.toLowerCase() !== valImport.toLowerCase();
+            
+            const rowClass = isDifferent ? 'table-warning' : '';
+            const diffIcon = isDifferent ? '<i class="bi bi-pencil-fill text-warning me-2"></i>' : '';
+
+            html += `
+                <tr class="${rowClass}">
+                    <td class="fw-bold text-nowrap" style="width: 30%">${diffIcon}${key}</td>
+                    <td class="text-secondary" style="width: 35%">${valDB || '<span class="text-muted small"><i>Vacío en sistema</i></span>'}</td>
+                    <td style="width: 35%">
+                        <input type="text" class="form-control form-control-sm border-primary edit-import-input" 
+                            data-key="${key}" value="${valImport || valDB}" 
+                            placeholder="Sin cambios en Excel...">
+                    </td>
+                </tr>`;
+        });
+        
+        $('#comparison-table-body').html(html);
+        // Usamos el ID correcto de tu modal de verificación
+        const modalEl = document.getElementById('verificationModal');
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+
+    function showEditModal(data) {
+        let html = '';
+        Object.keys(data).forEach(key => {
+            html += `
+                <div class="col-md-4 mb-3">
+                    <label class="form-label small fw-bold">${key}</label>
+                    <input type="text" class="form-control border-primary edit-simple-input" 
+                           data-key="${key}" value="${data[key]}">
+                </div>`;
+        });
+        $('#modal-form-fields').html(html);
+        const editModal = new bootstrap.Modal(document.getElementById('editPersonModal'));
+        editModal.show();
+    }
+
+    // 2. Guardar cambios desde el modal de comparación
+    // --- GUARDAR CAMBIOS DESDE EL MODAL DE COMPARACIÓN ---
+    $('#save-verification-changes-btn').on('click', function() {
+        if (activeUid === null) return;
+        
+        // 1. Encontrar a la persona en nuestro array usando el UID único
+        const itemIndex = processedData.findIndex(p => p.uid === activeUid);
+        
+        if (itemIndex !== -1) {
+            // 2. Recorrer todos los inputs del modal y actualizar los datos
+            $('.edit-import-input').each(function() {
+                const key = $(this).data('key');
+                const val = $(this).val();
+                
+                // Actualizamos el valor en nuestro objeto local
+                processedData[itemIndex].data[key] = val;
+            });
+
+            // 3. (Opcional) Forzar que el estado se mantenga como 'cambio' o volver a evaluar
+            // Para mayor seguridad, simplemente lo dejamos como está o forzamos 'cambio'
+            processedData[itemIndex].status = 'cambio';
+
+            // 4. Cerrar el modal (forma robusta para Bootstrap 5)
+            const modalEl = document.getElementById('verificationModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+
+            // 5. Refrescar la vista del acordeón para ver los cambios
+            renderAccordion();
+
+            Toastify({ 
+                text: "Cambios guardados en la lista de importación", 
+                backgroundColor: "#0d6efd" 
+            }).showToast();
+        }
+        
+        activeUid = null; // Limpiar para la próxima edición
+    });
+
+    // 3. Guardar cambios desde el modal simple
+    $('#save-modal-changes-btn').on('click', function() {
+        if (activeIndex === null) return;
+        
+        $('.edit-simple-input').each(function() {
+            const key = $(this).data('key');
+            const val = $(this).val();
+            processedData[activeIndex].data[key] = val;
+        });
+
+        bootstrap.Modal.getInstance(document.getElementById('editPersonModal')).hide();
+        renderAccordion();
+        Toastify({ text: "Datos actualizados", backgroundColor: "blue" }).showToast();
+    });
+
+    importBtn.on('click', function() {
+        if (!confirm("¿Deseas procesar la importación de todos estos habitantes?")) return;
+        
+        const payload = processedData.map(item => item.data);
+        fetch('/api/bulk-import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ datos: payload })
+        }).then(res => {
+            if (res.ok) {
+                Toastify({ text: "¡Importación completada con éxito!", backgroundColor: "green" }).showToast();
+                setTimeout(() => location.href = "/base_de_datos", 2000);
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>

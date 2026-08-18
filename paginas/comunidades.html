@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jerarquía de Comunidades</title>
+
+  <!-- jQuery, Bootstrap -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
+  
+  <link rel="stylesheet" href="/assets/css/Navs&Headers.css">
+  <!-- <link rel="stylesheet" href="/assets/css/Sidebar.css"> -->
+
+  <!-- Estilos y scripts de jsTree -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
+
+  <style>
+    :root {
+        --primary-color: #3b82f6;
+        --secondary-color: #2563eb;
+        --btn-main-color: #e3b707;
+        --btn-hover-color: #eab308;
+        --card-bg: #ffffff;
+        --font-stack: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    }
+    body {
+        font-family: var(--font-stack);
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        min-height: 100vh;
+        margin: 0;
+        color: #1e293b;
+        padding-bottom: 90px;
+    }
+    .main-wrapper {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .panel-card {
+      background: var(--card-bg);
+      border-radius: 1rem;
+      border: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      min-height: 650px;
+      overflow: hidden;
+    }
+    .header-gradient {
+      background: linear-gradient(120deg,#dd7a00, darkorange);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 1rem 1rem 0 0;
+    }
+    .search-wrapper { position: relative; }
+    .autocomplete-results {
+      position: absolute; top: 100%; left: 0; right: 0; z-index: 1000;
+      background: #fff; border-radius: 0.5rem; box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      max-height: 300px; overflow-y: auto; display: none; border: 1px solid #e2e8f0;
+    }
+    .autocomplete-item { padding: 0.75rem 1rem; cursor: pointer; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+    .autocomplete-item:hover { background: #f0fdf4; }
+    .autocomplete-item .search-meta { font-size: 0.75rem; color: #64748b; }
+    #tree-container {
+      max-height: 500px; overflow-y: auto; padding: 1rem;
+      background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0;
+    }
+    .action-panel { background: #f8fafc; border-left: 1px solid #e2e8f0; padding: 2rem; height: 100%; }
+    @media(max-width: 991px) { .action-panel { border-left: none; border-top: 1px solid #e2e8f0; } }
+    .multiselect-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a;
+      color: white; padding: 1.2rem; box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+      z-index: 1040; border-top: 3px solid #ef4444; display: none;
+    }
+    .wapper-aside { position: fixed; width: 10px; height: 100%; display: grid; align-items: center; z-index: 100; transform: translateY(-9%); }
+    .wapper-aside:hover .sidebar { transform: translateX(0); }
+    .sidebar {
+      z-index: 101; position: absolute; background-color: white; width: max-content;
+      border-radius: 10px; padding: 2rem 1rem; transform: translateX(-90%);
+      transition: transform .3s ease; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.30);
+    }
+    .sidebar:hover .sidebar_element { grid-template-columns: 40px 1fr; }
+    .sidebar_list { list-style: none; padding: 0; margin-bottom: 0; min-height: 400px; display: flex; flex-direction: column; gap: .4rem; justify-content: center; }
+    .sidebar_list a { text-decoration: none; }
+    .sidebar_element {
+      padding: .8rem 1.3rem; border-radius: 10px; display: grid; align-items: center;
+      grid-template-columns: 40px 0fr; color: #526581; transition: grid-template-columns .5s;
+    }
+    .sidebar_element:hover { background-color: #e3b707; color: #fff; cursor: pointer; }
+    .sidebar_icon { width: 100%; overflow: hidden; justify-self: center; }
+    .sidebar_text { padding-left: 1.3rem; text-wrap: nowrap; font-size: 1.1rem; }
+    .sidebar_hide { overflow: hidden; }
+    @media screen and (min-width: 1340px) and (max-width: 1360px){
+      .sidebar { padding: 1rem .5rem; }
+      .sidebar_list { gap: .2rem; }
+      .sidebar_element { padding: .8rem .8rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand nav-link text-white" href="/">
+        <i class="bi bi-cpu-fill text-warning me-1"></i>Octava Estrella
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+    </div>
+  </nav>
+
+    <div class="wapper-aside">
+        <aside class="sidebar">
+        <ul class="sidebar_list">
+          
+          <a href="/index">
+            <li class="sidebar_element">
+                <img src="../assets/icons/regresar.svg" alt="home" class="sidebar_icon" width="35px" height="35px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Inicio</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/base_de_datos">
+            <li class="sidebar_element">
+                <img src="../assets/icons/datos-black.png" alt="estadisticas" class="sidebar_icon" width="20px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Base de datos</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/comunidades">
+              <li class="sidebar_element">
+                <img src="../assets/icons/vista rapida-black.png" alt="informe" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Jerarquia</p>
+                </div>
+            </li>
+            </a>
+            
+            <a href="/filtros">
+            <li class="sidebar_element">
+                <i class="bi bi-pie-chart-fill sidebar_icon" style="font-size: 1.5rem; text-align: center; color: #000000;"></i>
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Estadísticas</p>
+                </div>
+            </li>
+          </a>
+
+            <a href="/historia">
+            <li class="sidebar_element">
+                <img src="../assets/icons/historial.svg" alt="informe" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Historial</p>
+                </div>
+            </li>
+          </a>
+            
+          <a href="/calendario">
+            <li class="sidebar_element">
+                <img src="../assets/icons/calendario.svg" alt="calendario" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Calendario</p>
+                </div>
+            </li>
+          </a>           
+
+          <a href="/galeria">
+            <li class="sidebar_element">
+                <img src="../assets/icons/galeria.svg" alt="galeria" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Galeria</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/listado_votantes">
+            <li class="sidebar_element">
+                <img src="../assets/icons/cuaderno-votacion.svg" alt="votantes" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Listado de Votantes</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/importar">
+            <li class="sidebar_element">
+                <img src="../assets/icons/importar.png" alt="importar" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Importar Datos</p>
+                </div>
+            </li>
+          </a>
+        </ul>
+        </aside>
+    </div>
+    
+  <main class="main-wrapper">
+    <div class="card panel-card">
+      <div class="header-gradient d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h2 class="mb-0 fw-bold"><i class="bi bi-diagram-3-fill me-2"></i>Estructura Habitacional</h2>
+          <small class="text-white-50">Gestione comunidades, manzanas/torres y viviendas de forma centralizada.</small>
+        </div>
+        <button class="btn btn-dark btn-sm shadow" type="button" data-bs-toggle="offcanvas" data-bs-target="#customizerOffcanvas">
+          <i class="bi bi-sliders me-1"></i> Iconos y Alias
+        </button>
+      </div>
+
+      <div class="row g-0">
+        <!-- Columna Izquierda: Árbol e Inputs -->
+        <div class="col-lg-7 p-4">
+          <div class="search-wrapper mb-4">
+            <label class="form-label fw-bold text-secondary"><i class="bi bi-person-search"></i> Búsqueda de Habitantes (Cédula o Nombre)</label>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-success"></i></span>
+              <input type="text" id="person-lookup" class="form-control border-start-0" placeholder="Escriba cédula o nombre de la persona...">
+            </div>
+            <div id="lookup-results" class="autocomplete-results"></div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold text-secondary"><i class="bi bi-funnel-fill"></i> Filtrar ramas de la estructura</label>
+            <div class="input-group input-group-sm">
+              <input type="text" id="search-input" class="form-control" placeholder="Escriba para filtrar ramas...">
+              <button class="btn btn-secondary" type="button" id="clear-search-btn">Restablecer</button>
+            </div>
+          </div>
+
+          <div id="tree-container" class="shadow-inner"></div>
+          
+          <div class="mt-3 d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-primary btn-sm" id="btn-create-comunidad">
+              <i class="bi bi-plus-circle"></i> Nueva Comunidad
+            </button>
+            <button class="btn btn-outline-danger btn-sm" id="btn-toggle-multiselect">
+              <i class="bi bi-check-all"></i> Selección Múltiple
+            </button>
+            <a href="/egresos" class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-archive-fill me-1"></i> Ver Historial de Egresos
+            </a>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Panel de Acción Dinámico -->
+        <div class="col-lg-5">
+          <div class="action-panel" id="action-panel-placeholder">
+            <div class="text-center py-5 text-muted">
+              <i class="bi bi-arrow-left-circle display-4 mb-3 d-block text-primary"></i>
+              <h5 id="placeholder-panel-title">Panel de Gestión Dinámico</h5>
+              <p class="small px-4" id="placeholder-panel-text">Seleccione cualquier elemento del árbol para consultar sus habitantes, renombrar secciones o añadir nuevos niveles habitacionales.</p>
+            </div>
+          </div>
+
+          <div class="action-panel d-none" id="action-panel-content">
+            <h4 class="fw-bold border-bottom pb-3 mb-3 text-primary" id="panel-title">Elemento Seleccionado</h4>
+            
+            <div id="node-info-block" class="mb-4">
+              <p class="mb-1 text-secondary small">Ruta de ubicación:</p>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-light p-2 rounded" id="node-breadcrumb"></ol>
+              </nav>
+            </div>
+
+            <div class="card mb-4 border-0 bg-light shadow-sm">
+              <div class="card-body">
+                <h6 class="fw-bold mb-3"><i class="bi bi-gear-fill text-secondary"></i> Herramientas de Edición</h6>
+                <div class="mb-3">
+                  <label class="form-label small">Modificar nombre:</label>
+                  <div class="input-group input-group-sm">
+                    <input type="text" id="edit-node-name" class="form-control">
+                    <button class="btn btn-warning" id="btn-rename-node">Cambiar</button>
+                  </div>
+                </div>
+                <div class="mb-3 d-none" id="add-child-container">
+                  <label class="form-label small" id="add-child-label">Añadir subnivel:</label>
+                  <div class="input-group input-group-sm">
+                    <input type="text" id="new-child-name" class="form-control" placeholder="Nombre del subnivel...">
+                    <button class="btn btn-success" id="btn-add-child">Agregar</button>
+                  </div>
+                </div>
+                <div>
+                  <button class="btn btn-danger btn-sm w-100" id="btn-delete-node">
+                    <i class="bi bi-trash3-fill"></i> Eliminar Sección y sus Habitantes
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-none" id="household-members-section">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold mb-0 text-success"><i class="bi bi-people-fill"></i> Integrantes Registrados</h6>
+                <a href="#" id="edit-household-btn" class="btn btn-primary btn-sm">
+                  <i class="bi bi-pencil-square"></i> Modificar Familia
+                </a>
+              </div>
+              <div id="members-list-container" class="table-responsive rounded shadow-sm"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para consultar el motivo del egreso -->
+    <div class="modal fade" id="modalMotivoEliminacion" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title fw-bold"><i class="bi bi-person-x-fill me-2"></i> Confirmar Eliminación</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <p class="fw-semibold text-secondary mb-3" id="lblDetalleEliminacion">Indique la razón por la cual dará de baja a esta sección:</p>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="radio" name="optMotivo" id="motivoMudanza" value="mudanza" checked>
+              <label class="form-check-label fw-bold text-dark" for="motivoMudanza">
+                <i class="bi bi-truck text-primary me-1"></i> Mudanza (Trasladar a hoja de Egresos)
+              </label>
+              <small class="d-block text-muted">La persona o sección se eliminará del censo pero se respaldará en la hoja "EGRESOS".</small>
+            </div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="radio" name="optMotivo" id="motivoFallecimiento" value="fallecimiento">
+              <label class="form-check-label fw-bold text-dark" for="motivoFallecimiento">
+                <i class="bi bi-heartbreak-fill text-dark me-1"></i> Fallecimiento (Trasladar a hoja de Egresos)
+              </label>
+              <small class="d-block text-muted">Se archivará el registro histórico en la hoja "EGRESOS".</small>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="optMotivo" id="motivoError" value="error">
+              <label class="form-check-label fw-bold text-danger" for="motivoError">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Error de registro / Habitante no existe
+              </label>
+              <small class="d-block text-muted">Se eliminará **permanentemente** sin dejar copia en la base de datos.</small>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" id="btnConfirmarMotivo" class="btn btn-danger btn-sm fw-bold">Procesar Eliminación</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="multiselect-bar" id="multiselect-actions-bar">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <span class="badge bg-danger fs-6 shadow me-2" id="multiselect-counter">0</span> 
+        <span class="fw-bold">elementos de la jerarquía marcados para borrado masivo.</span>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-light" id="btn-cancel-bulk">Cancelar</button>
+        <button class="btn btn-sm btn-danger fw-bold shadow" id="btn-execute-bulk"><i class="bi bi-trash3-fill"></i> Confirmar Eliminación Masiva</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="customizerOffcanvas">
+    <div class="offcanvas-header bg-light border-bottom">
+      <h5 class="offcanvas-title fw-bold"><i class="bi bi-palette text-warning"></i> Personalizar Jerarquías</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+      <p class="small text-muted">Ajuste los alias e iconos para cada nivel según la naturaleza de sus comunidades.</p>
+      <div class="mb-3">
+          <label class="form-label fw-bold">Seleccionar Comunidad</label>
+          <select id="config-comunidad-select" class="form-select border-primary"></select>
+      </div>
+      <div class="card mb-3 border-0 bg-light shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title text-primary border-bottom pb-2 fw-bold">Nivel 1: Comunidad</h6>
+            <div class="mt-2">
+                <label class="form-label small">Icono:</label>
+                <select id="config-comunidad-icon" class="form-select form-select-sm icon-selector"></select>
+            </div>
+          </div>
+      </div>
+      <div class="card mb-3 border-0 bg-light shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title text-info border-bottom pb-2 fw-bold">Nivel 2: Torres / Manzanas</h6>
+            <div class="mt-2">
+                <label class="form-label small">Etiqueta o Alias:</label>
+                <input type="text" id="config-torre-alias" class="form-control form-control-sm" placeholder="Ej: Torre, Calle, Manzana...">
+            </div>
+            <div class="mt-2">
+                <label class="form-label small">Icono:</label>
+                <select id="config-torre-icon" class="form-select form-select-sm icon-selector"></select>
+            </div>
+          </div>
+      </div>
+      <div class="card mb-4 border-0 bg-light shadow-sm">
+          <div class="card-body">
+            <h6 class="card-title text-success border-bottom pb-2 fw-bold">Nivel 3: Vivienda</h6>
+            <div class="mt-2">
+                <label class="form-label small">Etiqueta o Alias:</label>
+                <input type="text" id="config-casa-alias" class="form-control form-control-sm" placeholder="Ej: Casa, Apto, Local...">
+            </div>
+            <div class="mt-2">
+                <label class="form-label small">Icono:</label>
+                <select id="config-casa-icon" class="form-select form-select-sm icon-selector"></select>
+            </div>
+          </div>
+      </div>
+      <button id="save-config-btn" class="btn btn-warning w-100 py-2 fw-bold"><i class="bi bi-check2-circle"></i> Aplicar Cambios</button>
+    </div>
+  </div>
+
+<script>
+    const allIcons = [
+        { value: "bi-collection", label: "📂 Colección" },
+        { value: "bi-globe-americas", label: "🌍 Globo" },
+        { value: "bi-map", label: "🗺️ Mapa" },
+        { value: "bi-buildings", label: "🏙️ Ciudad" },
+        { value: "bi-tree", label: "🌳 Naturaleza" },
+        { value: "bi-building", label: "🏢 Edificio" },
+        { value: "bi-grid", label: "🔲 Manzana" },
+        { value: "bi-signpost", label: "🛣️ Calle" },
+        { value: "bi-geo-alt", label: "📍 Ubicación" },
+        { value: "bi-house-door-fill", label: "🏠 Casa" },
+        { value: "bi-door-closed", label: "🚪 Apartamento" },
+        { value: "bi-shop", label: "🏪 Local" }
+    ];
+
+    // Desactivamos el caché a nivel global en jQuery. La causa principal de los errores "fantasma".
+    $.ajaxSetup({ cache: false });
+
+    $(function () {
+        let iconOptionsHtml = '';
+        allIcons.forEach(icon => {
+            iconOptionsHtml += `<option value="${icon.value}">${icon.label}</option>`;
+        });
+        $('.icon-selector').html(iconOptionsHtml);
+
+        const treeElement = $('#tree-container');
+        const searchInput = $('#search-input');
+        const personLookup = $('#person-lookup');
+        const lookupResults = $('#lookup-results');
+        
+        let hierarchyConfig = JSON.parse(localStorage.getItem('hierarchyConfig') || '{}');
+        let selectedNodeData = null; 
+        let multiSelectActive = false;
+        let isTreeInitialized = false;
+
+        // Función unificada que carga o refresca utilizando la API nativa y asíncrona de jsTree
+        function initOrRefreshTree() {
+            if (isTreeInitialized) {
+                treeElement.jstree(true).refresh();
+                return;
+            }
+
+            treeElement.jstree({
+                'core': {
+                    'data': function (node, cb) {
+                        $.ajax({
+                            url: '/api/tree-data',
+                            dataType: 'json',
+                            success: function(rawData) {
+                                const selectMenu = $('#config-comunidad-select');
+                                selectMenu.empty();
+                                rawData.sort((a, b) => a.text.localeCompare(b.text));
+
+                                rawData.forEach(com => {
+                                    selectMenu.append(`<option value="${com.text}">${com.text}</option>`);
+                                    let conf = hierarchyConfig[com.text] || {
+                                        comIcon: 'bi-collection',
+                                        tAlias: 'Torre', tIcon: 'bi-building',
+                                        cAlias: 'Casa/Apto', cIcon: 'bi-house-door-fill'
+                                    };
+
+                                    com.id = "com_" + encodeURIComponent(com.text);
+                                    com.data = { originalText: com.text, level: 0 };
+                                    com.icon = `${conf.comIcon}`; 
+
+                                    if (com.children) {
+                                        com.children.forEach(t => {
+                                            t.id = com.id + "_tor_" + encodeURIComponent(t.text);
+                                            t.data = { originalText: t.text, level: 1 }; 
+                                            let tVal = t.text.replace('Torre ', ''); 
+                                            t.text = `${conf.tAlias} ${tVal}`;
+                                            t.icon = `${conf.tIcon}`; 
+                                            
+                                            if (t.children) {
+                                                t.children.forEach(c => {
+                                                    c.id = t.id + "_cas_" + encodeURIComponent(c.text);
+                                                    c.data = { originalText: c.text, level: 2 }; 
+                                                    let cVal = c.text.replace('Casa/Apto ', '');
+                                                    c.text = `${conf.cAlias} ${cVal}`;
+                                                    c.icon = `${conf.cIcon}`; 
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                                setTimeout(() => { selectMenu.trigger('change'); }, 100);
+                                cb(rawData); // Devolvemos la data procesada a jsTree
+                            },
+                            error: function() {
+                                Toastify({ text: "Fallo de conexión al cargar la estructura.", backgroundColor: "red" }).showToast();
+                                cb([]);
+                            }
+                        });
+                    },
+                    'themes': { 'name': 'default', 'responsive': true, 'icons': true }
+                },
+                'search': { 'show_only_matches': true, 'show_only_matches_children': true },
+                'plugins': ['search', 'types', 'sort', 'checkbox'], // Plugins cargados SIEMPRE
+                'sort': function(a, b) {
+                    return this.get_text(a).toLowerCase() > this.get_text(b).toLowerCase() ? 1 : -1;
+                },
+                'checkbox': {
+                    'visible': false, // Los checkboxes nacen ocultos hasta que pulses "Selección Múltiple"
+                    'three_state': true,
+                    'whole_node': false,
+                    'tie_selection': false
+                }
+            });
+
+            isTreeInitialized = true;
+        }
+
+        // Función ayudante para resetear la UI post-edición
+        function resetPanelAndRefresh() {
+            selectedNodeData = null;
+            $('#action-panel-content').addClass('d-none');
+            $('#action-panel-placeholder').removeClass('d-none');
+            initOrRefreshTree();
+        }
+
+        // Llamada Inicial
+        initOrRefreshTree();
+
+        // Buscador de ramas
+        let searchTimeout;
+        searchInput.on('keyup', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function () {
+                treeElement.jstree(true).search(searchInput.val());
+            }, 250);
+        });
+
+        $('#clear-search-btn').on('click', function() {
+            treeElement.jstree(true).clear_search();
+            searchInput.val('');
+        });
+
+        // Buscador predictivo por Nombre o Cédula
+        personLookup.on('input', function() {
+            const val = $(this).val().trim();
+            if (val.length < 3) { lookupResults.hide(); return; }
+
+            $.getJSON(`/api/search-people?q=${encodeURIComponent(val)}`, function(data) {
+                lookupResults.empty();
+                if (data && data.length > 0) {
+                    data.forEach(item => {
+                        const html = `<div class="autocomplete-item" data-comunidad="${item.comunidad}" data-torre="${item.torre}" data-casa="${item.casa}">
+                                <div class="fw-bold text-dark">${item.nombres}</div>
+                                <div class="search-meta">Cédula: ${item.documento || 'S/D'} | Ubicación: ${item.comunidad} - Torre ${item.torre} - Casa ${item.casa}</div>
+                            </div>`;
+                        lookupResults.append(html);
+                    });
+                    lookupResults.show();
+                } else {
+                    lookupResults.append('<div class="p-3 text-muted text-center small">No se hallaron habitantes</div>').show();
+                }
+            });
+        });
+
+        // Selección en el Autocomplete
+        $(document).on('click', '.autocomplete-item', function() {
+            const com = $(this).data('comunidad').toString().trim().toLowerCase();
+            const tor = $(this).data('torre').toString().trim().toLowerCase();
+            const cas = $(this).data('casa').toString().trim().toLowerCase();
+
+            lookupResults.hide(); personLookup.val('');
+
+            if (multiSelectActive) {
+                Toastify({ text: "Desactive la selección múltiple para usar la búsqueda unitaria.", backgroundColor: "orange" }).showToast();
+                return;
+            }
+
+            const treeInst = treeElement.jstree(true);
+            const allNodes = treeInst._model.data;
+            let targetNodeId = null;
+
+            for (let id in allNodes) {
+                const node = allNodes[id];
+                if (node.data && node.data.level === 2) {
+                    const nodeCasa = node.data.originalText.replace('Casa/Apto ', '').trim().toLowerCase();
+                    const parentTorreNode = treeInst.get_node(node.parent);
+                    if (!parentTorreNode || !parentTorreNode.data) continue;
+                    const nodeTorre = parentTorreNode.data.originalText.replace('Torre ', '').trim().toLowerCase();
+                    const parentComNode = treeInst.get_node(parentTorreNode.parent);
+                    if (!parentComNode || !parentComNode.data) continue;
+                    const nodeCom = parentComNode.data.originalText.trim().toLowerCase();
+
+                    if (nodeCom === com && nodeTorre === tor && nodeCasa === cas) { targetNodeId = node.id; break; }
+                }
+            }
+
+            if (targetNodeId) {
+                treeInst.deselect_all();
+                treeInst.select_node(targetNodeId);
+                setTimeout(() => {
+                    const elementToScroll = document.getElementById(targetNodeId);
+                    if (elementToScroll) elementToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            } else {
+                Toastify({ text: "No se encontró la ubicación exacta en la estructura actual.", backgroundColor: "red" }).showToast();
+            }
+        });
+
+        $(document).on('click', function(e) { if (!$(e.target).closest('.search-wrapper').length) lookupResults.hide(); });
+
+        // Panel de Gestión Dinámico
+        treeElement.on('select_node.jstree', function (e, data) {
+            if (multiSelectActive) return;
+
+            const node = data.node;
+            const instance = data.instance;
+            const level = node.data.level;
+
+            selectedNodeData = { id: node.id, level: level, text: node.text, originalText: node.data.originalText };
+
+            $('#action-panel-placeholder').addClass('d-none');
+            $('#action-panel-content').removeClass('d-none');
+
+            let pathHtml = '';
+            if (level === 0) {
+                selectedNodeData.comunidad = node.data.originalText;
+                pathHtml = `<li class="breadcrumb-item active">${selectedNodeData.comunidad}</li>`;
+                $('#panel-title').html(`<i class="bi bi-collection text-primary"></i> ${selectedNodeData.comunidad}`);
+                $('#edit-node-name').val(selectedNodeData.comunidad);
+                $('#add-child-container').removeClass('d-none');
+                $('#add-child-label').text('Añadir Manzana / Torre:');
+                $('#new-child-name').val('').attr('placeholder', 'Ej: Torre C, Manzana 3...');
+                $('#household-members-section').addClass('d-none');
+            } else if (level === 1) {
+                const parentNode = instance.get_node(node.parent);
+                selectedNodeData.comunidad = parentNode.data.originalText;
+                selectedNodeData.torre = node.data.originalText.replace('Torre ', '');
+
+                pathHtml = `<li class="breadcrumb-item text-secondary">${selectedNodeData.comunidad}</li><li class="breadcrumb-item active">${node.text}</li>`;
+                $('#panel-title').html(`<i class="bi bi-building text-info"></i> ${node.text}`);
+                $('#edit-node-name').val(selectedNodeData.torre);
+                $('#add-child-container').removeClass('d-none');
+                $('#add-child-label').text('Añadir Casa / Apto:');
+                $('#new-child-name').val('').attr('placeholder', 'Ej: Casa 12, Apto 402...');
+                $('#household-members-section').addClass('d-none');
+            } else if (level === 2) {
+                const parentTorreNode = instance.get_node(node.parent);
+                const parentComNode = instance.get_node(parentTorreNode.parent);
+                
+                selectedNodeData.comunidad = parentComNode.data.originalText;
+                selectedNodeData.torre = parentTorreNode.data.originalText.replace('Torre ', '');
+                selectedNodeData.casa = node.data.originalText.replace('Casa/Apto ', '');
+
+                pathHtml = `<li class="breadcrumb-item text-secondary">${selectedNodeData.comunidad}</li><li class="breadcrumb-item text-secondary">${parentTorreNode.text}</li><li class="breadcrumb-item active">${node.text}</li>`;
+                $('#panel-title').html(`<i class="bi bi-house-door-fill text-success"></i> ${node.text}`);
+                $('#edit-node-name').val(selectedNodeData.casa);
+                $('#add-child-container').addClass('d-none');
+                $('#household-members-section').removeClass('d-none');
+
+                $('#edit-household-btn').attr('href', `/editar-hogar?comunidad=${encodeURIComponent(selectedNodeData.comunidad)}&torre=${encodeURIComponent(selectedNodeData.torre)}&casa=${encodeURIComponent(selectedNodeData.casa)}`);
+                const apiUrl = `/api/get-people?comunidad=${encodeURIComponent(selectedNodeData.comunidad)}&torre=${encodeURIComponent(selectedNodeData.torre)}&casa=${encodeURIComponent(selectedNodeData.casa)}`;
+                
+                $('#members-list-container').html('<div class="text-center py-3"><div class="spinner-border text-success spinner-border-sm"></div> Cargando...</div>');
+                
+                $.getJSON(apiUrl, function(people) {
+                    $('#members-list-container').empty();
+                    if (people && people.length > 0) {
+                        let table = '<table class="table table-sm table-hover border mb-0 bg-white" style="font-size:0.85rem;"><thead class="table-light"><tr><th>Parentesco</th><th>Nombre y Apellidos</th><th>Cédula</th></tr></thead><tbody>';
+                        people.forEach(p => { table += `<tr><td><span class="badge bg-secondary">${p.parentesco || 'S/D'}</span></td><td class="fw-bold">${p.nombres || ''}</td><td>${p.documento || ''}</td></tr>`; });
+                        table += '</tbody></table>';
+                        $('#members-list-container').append(table);
+                    } else {
+                        $('#members-list-container').html('<div class="p-3 bg-white text-muted text-center small border rounded">No hay miembros registrados.</div>');
+                    }
+                });
+            }
+            $('#node-breadcrumb').html(pathHtml);
+        });
+
+        treeElement.on('check_node.jstree uncheck_node.jstree', function() {
+            if (!multiSelectActive) return;
+            $('#multiselect-counter').text(treeElement.jstree(true).get_checked(false).length);
+        });
+
+        // Alternador de Modo Selección Libre de Errores Visuales
+        $('#btn-toggle-multiselect').on('click', function() {
+            multiSelectActive = !multiSelectActive;
+            selectedNodeData = null;
+            const inst = treeElement.jstree(true);
+
+            if (multiSelectActive) {
+                $(this).text('Salir de Selección').removeClass('btn-outline-danger').addClass('btn-danger');
+                $('#action-panel-placeholder').removeClass('d-none');
+                $('#placeholder-panel-title').html('<i class="bi bi-ui-checks text-danger"></i> Selección Activa');
+                $('#placeholder-panel-text').text('Use las casillas que aparecieron en el árbol habitacional para marcar los niveles que desea borrar masivamente.');
+                $('#action-panel-content').addClass('d-none');
+                $('#multiselect-actions-bar').fadeIn(200);
+                inst.show_checkboxes(); // Revela visualmente el plugin
+            } else {
+                $(this).text('Selección Múltiple').removeClass('btn-danger').addClass('btn-outline-danger');
+                $('#placeholder-panel-title').text('Panel de Gestión Dinámico');
+                $('#placeholder-panel-text').text('Seleccione cualquier elemento del árbol para consultar sus habitantes, renombrar secciones o añadir nuevos niveles habitacionales.');
+                $('#multiselect-actions-bar').fadeOut(200);
+                inst.uncheck_all();
+                inst.hide_checkboxes(); // Oculta visualmente el plugin
+            }
+        });
+
+        $('#btn-cancel-bulk').on('click', function() { $('#btn-toggle-multiselect').trigger('click'); });
+
+        $('#btn-execute-bulk').on('click', function() {
+            const inst = treeElement.jstree(true);
+            const checkedIds = inst.get_checked(false);
+
+            if (checkedIds.length === 0) { Toastify({ text: "Seleccione al menos una casilla.", backgroundColor: "orange" }).showToast(); return; }
+            if (!confirm(`⚠️ ALERTA ⚠️\nSe borrarán ${checkedIds.length} secciones y sus habitantes. ¿Continuar?`)) return;
+
+            const targets = checkedIds.map(id => {
+                const node = inst.get_node(id); const level = node.data.level;
+                let com = "", tor = "", cas = "";
+                if (level === 0) { com = node.data.originalText; } 
+                else if (level === 1) { com = inst.get_node(node.parent).data.originalText; tor = node.data.originalText.replace('Torre ', ''); } 
+                else if (level === 2) {
+                    const pTorre = inst.get_node(node.parent);
+                    com = inst.get_node(pTorre.parent).data.originalText;
+                    tor = pTorre.data.originalText.replace('Torre ', '');
+                    cas = node.data.originalText.replace('Casa/Apto ', '');
+                }
+                return { level: level === 0 ? "comunidad" : (level === 1 ? "torre" : "casa"), comunidad: com, torre: tor, casa: cas };
+            });
+
+            fetch('/api/tree/delete-multiple', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targets: targets })
+            }).then(res => {
+                if (res.ok) {
+                    Toastify({ text: "Limpieza masiva ejecutada.", backgroundColor: "green" }).showToast();
+                    $('#btn-toggle-multiselect').trigger('click');
+                    resetPanelAndRefresh();
+                } else { Toastify({ text: "Fallo en el servidor.", backgroundColor: "red" }).showToast(); }
+            });
+        });
+
+        $('#btn-rename-node').on('click', function() {
+            if (!selectedNodeData) return;
+            const newName = $('#edit-node-name').val().trim();
+            if (!newName) { Toastify({ text: "Ingrese el nuevo nombre.", backgroundColor: "orange" }).showToast(); return; }
+
+            const levelType = selectedNodeData.level === 0 ? "comunidad" : (selectedNodeData.level === 1 ? "torre" : "casa");
+            const payload = { level: levelType, comunidad: selectedNodeData.comunidad, torre: selectedNodeData.torre || "", casa: selectedNodeData.casa || "", new_name: newName };
+
+            fetch('/api/tree/rename', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            }).then(res => {
+                if (res.ok) {
+                    Toastify({ text: "Actualización exitosa.", backgroundColor: "green" }).showToast();
+                    resetPanelAndRefresh();
+                } else { Toastify({ text: "Error de servidor.", backgroundColor: "red" }).showToast(); }
+            });
+        });
+
+        $('#btn-add-child').on('click', function() {
+            if (!selectedNodeData) return;
+            const childName = $('#new-child-name').val().trim();
+            if (!childName) { Toastify({ text: "Nombre inválido.", backgroundColor: "orange" }).showToast(); return; }
+
+            const isTorre = selectedNodeData.level === 0;
+            const payload = { level: isTorre ? "torre" : "casa", comunidad: selectedNodeData.comunidad, torre: isTorre ? "" : selectedNodeData.torre, casa: "", new_name: childName };
+
+            fetch('/api/tree/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            }).then(res => {
+                if (res.ok) {
+                    Toastify({ text: "Agregado a la estructura.", backgroundColor: "green" }).showToast();
+                    resetPanelAndRefresh();
+                } else { Toastify({ text: "Error de estructuración.", backgroundColor: "red" }).showToast(); }
+            });
+        });
+
+        let modalEliminacionBs = null;
+
+        $('#btn-delete-node').on('click', function() {
+            if (!selectedNodeData) return;
+            
+            // Personalizar texto según la sección
+            let textoSeccion = selectedNodeData.level === 0 ? `la comunidad "${selectedNodeData.comunidad}"` :
+                              (selectedNodeData.level === 1 ? `la torre "${selectedNodeData.torre}"` : `la vivienda "${selectedNodeData.casa}"`);
+            
+            $('#lblDetalleEliminacion').text(`Indique la razón por la cual dará de baja a ${textoSeccion}:`);
+            
+            // Instanciar y abrir el Modal Bootstrap
+            modalEliminacionBs = new bootstrap.Modal(document.getElementById('modalMotivoEliminacion'));
+            modalEliminacionBs.show();
+        });
+
+        $('#btnConfirmarMotivo').on('click', function() {
+            if (!selectedNodeData) return;
+
+            const motivoSeleccionado = $('input[name="optMotivo"]:checked').value || $('input[name="optMotivo"]:checked').val();
+            const levelType = selectedNodeData.level === 0 ? "comunidad" : (selectedNodeData.level === 1 ? "torre" : "casa");
+            
+            const payload = { 
+                level: levelType, 
+                comunidad: selectedNodeData.comunidad, 
+                torre: selectedNodeData.torre || "", 
+                casa: selectedNodeData.casa || "",
+                motivo: motivoSeleccionado
+            };
+
+            // Deshabilitar botón durante la Petición
+            $(this).prop('disabled', true).text('Procesando...');
+
+            fetch('/api/tree/delete', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload)
+            }).then(res => {
+                $('#btnConfirmarMotivo').prop('disabled', false).text('Procesar Eliminación');
+                if (modalEliminacionBs) modalEliminacionBs.hide();
+
+                if (res.ok) {
+                    Toastify({ text: "Operación de baja completada exitosamente.", backgroundColor: "green" }).showToast();
+                    resetPanelAndRefresh();
+                } else { 
+                    Toastify({ text: "Fallo al procesar la baja en el servidor.", backgroundColor: "red" }).showToast(); 
+                }
+            }).catch(err => {
+                $('#btnConfirmarMotivo').prop('disabled', false).text('Procesar Eliminación');
+                if (modalEliminacionBs) modalEliminacionBs.hide();
+                Toastify({ text: "Error de red o conexión.", backgroundColor: "red" }).showToast();
+            });
+        });
+
+        $('#btn-create-comunidad').on('click', function() {
+            const newCom = prompt("Nueva comunidad a fundar:");
+            if (!newCom || !newCom.trim()) return;
+
+            fetch('/api/tree/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ level: "comunidad", comunidad: "", torre: "", casa: "", new_name: newCom.trim() })
+            }).then(res => {
+                if (res.ok) {
+                    Toastify({ text: "Nueva Comunidad establecida.", backgroundColor: "green" }).showToast();
+                    resetPanelAndRefresh();
+                } else { Toastify({ text: "Operación rechazada.", backgroundColor: "red" }).showToast(); }
+            });
+        });
+
+        $('#config-comunidad-select').on('change', function() {
+            const comName = $(this).val();
+            let conf = hierarchyConfig[comName] || { comIcon: 'bi-collection', tAlias: 'Torre', tIcon: 'bi-building', cAlias: 'Casa/Apto', cIcon: 'bi-house-door-fill' };
+            $('#config-comunidad-icon').val(conf.comIcon); $('#config-torre-alias').val(conf.tAlias);
+            $('#config-torre-icon').val(conf.tIcon); $('#config-casa-alias').val(conf.cAlias); $('#config-casa-icon').val(conf.cIcon);
+        });
+
+        $('#save-config-btn').on('click', function() {
+            const comName = $('#config-comunidad-select').val();
+            if(!comName) return;
+
+            hierarchyConfig[comName] = {
+                comIcon: $('#config-comunidad-icon').val() || 'bi-collection', tAlias: $('#config-torre-alias').val() || 'Torre',
+                tIcon: $('#config-torre-icon').val() || 'bi-building', cAlias: $('#config-casa-alias').val() || 'Casa/Apto', cIcon: $('#config-casa-icon').val() || 'bi-house-door-fill'
+            };
+            localStorage.setItem('hierarchyConfig', JSON.stringify(hierarchyConfig));
+            
+            initOrRefreshTree(); // Refresca usando la API sana
+            bootstrap.Offcanvas.getInstance(document.getElementById('customizerOffcanvas')).hide();
+        });
+    });
+</script>
+</body>
+</html>

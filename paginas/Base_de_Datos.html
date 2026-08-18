@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Base de Datos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
+
+  <link rel="stylesheet" href="/assets/css/Navs&Headers.css">
+  <link rel="stylesheet" href="/assets/css/Sidebar.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --primary-color: #3b82f6;
+      --secondary-color: #2563eb;
+      --btn-main-color: #e3b707;
+      --btn-hover-color: #eab308;
+      --text-light-color: #fff;
+      --text-dark-color: #333;
+      --background-gradient: linear-gradient(120deg, var(--primary-color), var(--secondary-color));
+      --font-stack: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    }
+    body {
+      font-family: var(--font-stack);
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6); /* Fondo azul oscuro de comunidades */
+      min-height: 100vh;
+      margin: 0;
+      color: #1e293b; /* Color de texto actualizado */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Nuevas clases heredadas de Comunidades */
+    .main-wrapper {
+      max-width: 1350px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+    .panel-card {
+      background: #ffffff;
+      border-radius: 1rem;
+      border: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      min-height: 650px;
+      overflow: hidden;
+      padding-bottom: 2rem;
+    }
+    .header-gradient {
+      background: linear-gradient(120deg, #1ab49c, #0da08a);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 1rem 1rem 0 0;
+      margin-bottom: 1.5rem;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .dataTables_info {
+      font-weight: bold;
+      padding-top: 10px !important;
+    }
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    padding: 0.5rem 1rem !important;
+    margin: 0 2px !important;
+    background: #fff !important; /* Fondo blanco inicial */
+    color: #333 !important;
+    transition: all 0.3s ease; 
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #f1c40f !important; 
+    border-color: #d4ac0d !important;
+    color: #212529 !important;
+    cursor: pointer;
+}
+/* Estilo para el botón activo (la página actual seleccionada) */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #f1c40f !important; 
+    border-color: #d4ac0d !important;
+    color: #212529 !important;
+    font-weight: bold;
+}
+
+    #editableTable {
+      border-collapse: collapse !important;
+      font-size: 0.85rem; /* Texto un poco más pequeño para legibilidad */
+  }
+
+    #editableTable input {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+    }
+    #editableTable input:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      background-color: #e6f0ff;
+    }
+    #editableTable th { 
+      background: #007bff; 
+      color: white; 
+      text-align: center; 
+      min-width: 150px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .fixedHeader-floating {
+    background-color: #fffaf0 !important;
+    border-bottom: 3px solid #f5b041 !important;
+    }
+    
+    #editableTable tbody tr:nth-child(even) { background-color: #f2f2f2; }
+    
+    #editableTable tbody tr:hover { background-color: #e6f0ff; }
+    #editableTable td { text-align: center; }
+
+    table.dataTable thead>tr>th.sorting{
+        text-align: center;
+    }
+
+    .dataTables_filter input:focus {
+    border-color: var(--primary-color) !important;
+    outline: none;
+    background-color: #e6f0ff !important;
+  }
+
+    /* Estilos de botones y controles */
+    #guardar, #descartar {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+    #guardar { background: #28a745; }
+    #guardar:hover { background: #218838; }
+    #guardar:disabled { background: #6c757d; cursor: not-allowed; }
+    #descartar { background: #ff9900f5; }
+    #descartar:hover { background: #ff9900b9; }
+    #editControls { display: none; gap: 1rem; margin-bottom: 1rem;}
+    .exportar-btns { margin-bottom: 1rem; display: flex; gap: 1rem; }
+    .buttons-container { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.5rem; }
+  
+    .wapper-aside{
+        position: fixed;
+        width: 10px;
+        height: 100%;
+        display: grid;
+        align-items: center;
+        z-index: 100;
+    }
+
+    .wapper-aside:hover .sidebar{
+        transform: translateX(0);
+    }
+
+    .sidebar{
+        z-index: 101;
+        position: absolute;
+        background-color: white;
+        width: max-content;
+        border-radius: 10px;
+        padding:  2rem 1rem;
+        transform: translateX(-90%);
+        transition: transform .3s ease;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.30);
+    }
+
+    .sidebar:hover .sidebar_element{
+        grid-template-columns: 40px 1fr;
+    }
+
+    .sidebar_list{
+        list-style: none;
+        padding: 0;
+        margin-bottom: 0;
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+        justify-content: center;
+    }
+
+    .sidebar_list a{
+      text-decoration: none;
+    }
+
+    .sidebar_element{
+        padding: .8rem 1.3rem;
+        border-radius: 10px;
+        display: grid;
+        align-items: center;
+        grid-template-columns: 40px 0fr;
+        color: #526581;
+
+        transition:  grid-template-columns .5s;
+    }
+
+    .sidebar_element:hover{
+        background-color: #e3b707;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .sidebar_element a{
+      text-decoration: none;
+      color: #526581;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .sidebar_element a:hover{
+      color: #fff;
+    }
+
+    .sidebar_icon{
+        width: 100%;
+        overflow: hidden;
+        justify-self: center;
+    }
+
+    .sidebar_text{
+        padding-left: 1.3rem;
+        text-wrap: nowrap;
+        font-size: 1.1rem;
+    }
+
+    .sidebar_hide{
+        overflow: hidden;
+    }
+
+    @media screen and (min-width: 1340px) and (max-width: 1360px){
+      .sidebar{
+        padding:  1rem .5rem;
+      }
+
+      .sidebar_list{
+        gap: .2rem;
+
+      }
+
+      .sidebar_element{
+        padding: .8rem .8rem;
+    }
+
+    /* Para que los iconos resalten un poco más */
+    .bi-accessibility { font-weight: bold; }
+    
+    /* Evitar que las filas se vuelvan muy altas por los iconos */
+    #editableTable td {
+      padding: 8px 10px;
+      vertical-align: middle;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .small {
+      color: #555;
+      font-weight: 500;
+    }
+  } 
+
+/* Ajuste para los selects e inputs dentro de la tabla */
+.form-select-table, .form-input-table {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #3b82f6;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+/* Contenedor para iconos y nombre */
+.nombre-flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand nav-link" href="/">
+        <i class="bi bi-cpu-fill text-warning"></i> Octava Estrella
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="wapper-aside">
+        <aside class="sidebar">
+        <ul class="sidebar_list">
+          
+          <a href="/index">
+            <li class="sidebar_element">
+                <img src="../assets/icons/regresar.svg" alt="home" class="sidebar_icon" width="35px" height="35px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Inicio</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/base_de_datos">
+            <li class="sidebar_element">
+                <img src="../assets/icons/datos-black.png" alt="estadisticas" class="sidebar_icon" width="20px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Base de datos</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/comunidades">
+              <li class="sidebar_element">
+                <img src="../assets/icons/vista rapida-black.png" alt="informe" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Jerarquia</p>
+                </div>
+            </li>
+          </a>
+            
+          <a href="/filtros">
+            <li class="sidebar_element">
+                <i class="bi bi-pie-chart-fill sidebar_icon" style="font-size: 1.5rem; text-align: center; color: #000;"></i>
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Estadísticas</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/historia">
+            <li class="sidebar_element">
+                <img src="../assets/icons/historial.svg" alt="informe" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Historial</p>
+                </div>
+            </li>
+          </a>
+            
+          <a href="/calendario">
+            <li class="sidebar_element">
+                <img src="../assets/icons/calendario.svg" alt="calendario" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Calendario</p>
+                </div>
+            </li>
+          </a>           
+
+          <a href="/galeria">
+            <li class="sidebar_element">
+                <img src="../assets/icons/galeria.svg" alt="galeria" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Galeria</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/listado_votantes">
+            <li class="sidebar_element">
+                <img src="../assets/icons/cuaderno-votacion.svg" alt="votantes" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Listado de Votantes</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/importar">
+            <li class="sidebar_element">
+                <img src="../assets/icons/importar.png" alt="importar" class="sidebar_icon" width="20px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Importar Datos</p>
+                </div>
+            </li>
+          </a>
+        </ul>
+    </aside>
+  </div>
+
+  <main class="main-wrapper">
+    <div class="card panel-card">
+      <!-- Encabezado estilo Comunidades -->
+      <div class="header-gradient d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h2 class="mb-0 fw-bold"><i class="bi bi-people-fill me-2"></i>Habitantes del Conj. Residencial</h2>
+          <small class="text-white-50">Gestione, edite y exporte la base de datos del censo de forma centralizada.</small>
+        </div>
+      </div>
+
+      <!-- Contenedor interno para dar margen a la tabla y botones -->
+      <div class="px-4">
+        
+        <div class="buttons-container">
+          <div>
+            <button id="toggleMode" class="btn btn-info mt-3">Alternar Modo (Edición)</button>
+            <span id="modeStatus" class="ms-3 badge bg-secondary">Modo: Edición</span>
+          </div>
+
+          <div class="exportar-btns">
+            <a href="/agregar-hogar" class="btn btn-dark mt-3">
+              <i class="bi bi-person-plus-fill"></i> Agregar Familia
+            </a>
+
+            <button id="filterButton" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#filterModal">
+              <i class="bi bi-filter"></i> Filtrar
+            </button>
+
+            <button id="exportarPDF" class="btn btn-danger mt-3">
+              <i class="bi bi-file-earmark-pdf"></i> Exportar a PDF
+            </button>
+
+            <button id="exportar" class="btn btn-warning mt-3">
+              <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+            </button>
+          </div>
+        </div>
+
+        <div id="editControls">
+          <button id="guardar" class="btn btn-success"><i class="bi bi-check-circle"></i> Guardar cambios</button>
+          <button id="descartar" class="btn btn-warning text-white"><i class="bi bi-x-circle"></i> Descartar Cambios</button>
+        </div>
+
+        <div class="table-responsive">
+            <table id="editableTable" class="table table-striped table-hover w-100"></table>
+        </div>
+
+        <div class="dropdown mt-3">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="btnOpcionesAvanzadas" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-gear-fill"></i> Avanzado
+          </button>
+          <ul class="dropdown-menu shadow" aria-labelledby="btnOpcionesAvanzadas">
+            <li>
+              <a class="dropdown-item text-success" href="#" id="exportarFull">
+                <i class="bi bi-file-earmark-arrow-down"></i> Descargar Excel Original
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card mt-4 shadow-sm border-0 bg-light">
+          <div class="card-body">
+            <h6 class="card-title fw-bold text-muted mb-3">
+              <i class="bi bi-info-circle-fill me-2"></i> Leyenda de Identificación
+            </h6>
+            <div class="row g-3">
+              <div class="col-6 col-md-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person-fill-exclamation text-danger fs-5 me-2"></i>
+                  <span class="small">Discapacidad (Registrada)</span>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person-walking text-warning fs-5 me-2"></i>
+                  <span class="small">Adulto Mayor (60+ años)</span>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-backpack text-info fs-5 me-2"></i>
+                  <span class="small">Menor de Edad (-18 años)</span>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person text-secondary fs-5 me-2"></i>
+                  <span class="small">Adulto (Población general)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- Fin padding interno px-4 -->
+    </div>
+  </main>
+
+  <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="filterModalLabel">Filtrar Información</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <!-- Seccion de Rango de Edad -->
+          <div class="card p-3 mb-3 bg-light border-0">
+            <label class="form-label fw-bold text-secondary">
+              <i class="bi bi-calendar-range me-1"></i> Rango de Edad:
+            </label>
+            <div class="row g-2">
+              <div class="col-6">
+                <input type="number" class="form-control" id="minAgeInput" placeholder="Edad mínima (ej. 18)" min="0">
+              </div>
+              <div class="col-6">
+                <input type="number" class="form-control" id="maxAgeInput" placeholder="Edad máxima (ej. 60)" min="0">
+              </div>
+            </div>
+          </div>
+
+          <div id="filterInputsContainer">
+            <!-- Aquí se agregarán dinámicamente los campos de filtro -->
+          </div>
+          <button type="button" class="btn btn-sm btn-secondary mt-3" id="addFilterInput">
+            <i class="bi bi-plus-circle"></i> Agregar otro filtro
+          </button>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="applyFilterButton">Aplicar Filtro</button>
+          <button type="button" class="btn btn-warning" id="clearAllFiltersButton">Limpiar Todos los Filtros</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let pendingChanges = {};
+    let dataTableInstance;
+    let readOnlyMode = true;
+    let excelHeaders = []; // Para almacenar los encabezados del Excel
+    let activeFilters = []; // Almacenará { column: "Nombre", value: "Juan" }
+
+    const opcionesSelect = {
+        "Parentesco": ['JEFE/A DE FAMILIA', 'CONYUGE', 'PADRE/MADRE', 'HIJO/A', 'ABUELO/A', 'NIETO/A', 'HERMANO/A','PRIMO/A', 'SOBRINO/A','SUEGRO/A'],
+        "Genero Biológico": ["M", "F"],
+        "Comunidad": ['19A', '19B', '19C', '20A', '20B', 'MZA', 'RUBI', 'YOCO', 'ENSE', 'SIPAO'],
+        "Estado civil": ['SOLTERO/A', 'CASADO/A', 'DIVORCIADO/A','VIUDO/A'],
+        "¿Embarazada?": ["SI", "NO"],
+        "¿Lactante 0 - 11 meses?": ["SI", "NO"],
+        "Nivel educativo": ['PREESCOLAR', 'PRIMARIA', 'SECUNDARIA', 'BACHILLER', 'UNIVERSITARIO', 'TECNICO MEDIO', 'TECNICO SUPERIOR', 'MAESTRIA', 'DOCTORADO', 'POSTGRADO', 'NO INDICA'],
+        "Torre": ['1', '2', '3', '4', '5', '6', '7', '8',
+                '15', '16', '17', '18', '25',
+                'UNICA'],
+        "Estado de ocupante": ['ACTIVO', 'IRREGULAR', 'AUSENTE'],
+        "Condicion de vivienda": ['PROPIA', 'DE UN FAMILIAR', 'ALQUILADA', 'VISITANTE'],
+        "Bombona":['NO POSEE', '10 KG', '18 KG', '43 KG', 'GAS DIRECTO'],
+        "Enfermedad": ['Ninguna', 'Hipertensión', 'Apnea de sueño', 'Enfermedad cardiovascular', 
+                'Enfermedad musculo-esquelética', 'Diabetes', 'Asma', 'Hiperplasia prostática', 
+                'Enfermedad mental', 'Tiroides y problemas hormonales', 'Lupus', 
+                'Artritis / Artrosis', 'Enfermedad renal', 'Trastorno gastrointestinal', 
+                'Alergias', 'Cáncer', 'Glaucoma', 'Parkinson', 'Otro'],
+        "Beneficios": ['NINGUNO', 'JUBILACIÓN', 'PENSIÓN', 'CARNET DE LA PATRIA', 'OTRO'],
+
+    };
+
+    // Función para renderizar un grupo de campos de filtro
+    function renderFilterInput(filter = { column: '', value: '' }, index = 0) {
+      const filterColumnOptions = excelHeaders.map(header => 
+        `<option value="${header}" ${filter.column === header ? 'selected' : ''}>${header}</option>`
+      ).join('');
+
+      return `
+        <div class="mb-3 p-2 border rounded filter-group" data-filter-index="${index}">
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn-close remove-filter-input" aria-label="Remove" data-filter-index="${index}"></button>
+          </div>
+          <div class="mb-2">
+            <label for="filterColumn-${index}" class="form-label">Columna a filtrar:</label>
+            <select class="form-select filter-column-select" id="filterColumn-${index}" data-filter-index="${index}">
+              ${filterColumnOptions}
+            </select>
+          </div>
+          <div>
+            <label for="filterValue-${index}" class="form-label">Valor del filtro:</label>
+            <input type="text" class="form-control filter-value-input" id="filterValue-${index}" value="${filter.value}" data-filter-index="${index}">
+          </div>
+        </div>
+      `;
+    }
+
+    // Función para actualizar el contenedor de filtros
+    function updateFilterInputsContainer() {
+      const container = document.getElementById("filterInputsContainer");
+      container.innerHTML = ''; // Limpiar el contenedor
+      if (activeFilters.length === 0 && excelHeaders.length > 0) {
+        // Si no hay filtros activos, agregar uno por defecto con la primera columna
+        activeFilters.push({ column: excelHeaders[0], value: '' });
+      }
+      activeFilters.forEach((filter, index) => {
+        container.insertAdjacentHTML('beforeend', renderFilterInput(filter, index));
+      });
+      attachFilterInputListeners();
+    }
+
+    // Adjuntar listeners a los nuevos inputs de filtro
+    function attachFilterInputListeners() {
+      document.querySelectorAll('.filter-column-select').forEach(select => {
+        select.onchange = (e) => {
+          const index = parseInt(e.target.dataset.filterIndex);
+          activeFilters[index].column = e.target.value;
+        };
+      });
+      document.querySelectorAll('.filter-value-input').forEach(input => {
+        input.oninput = (e) => {
+          const index = parseInt(e.target.dataset.filterIndex);
+          activeFilters[index].value = e.target.value;
+        };
+      });
+      document.querySelectorAll('.remove-filter-input').forEach(button => {
+        button.onclick = (e) => {
+          const index = parseInt(e.target.dataset.filterIndex);
+          activeFilters.splice(index, 1); // Eliminar el filtro del array
+          updateFilterInputsContainer(); // Volver a renderizar
+        };
+      });
+    }
+
+    fetch("/api/excel/columns")
+      .then(res => res.json())
+      .then(headers => {
+        excelHeaders = headers; // Guardar los encabezados (ya vienen limpios del backend)
+        const thead = document.createElement("thead");
+        const trh = document.createElement("tr");
+        headers.forEach(h => {
+          const th = document.createElement("th");
+          th.textContent = h;
+          trh.appendChild(th);
+        });
+        thead.appendChild(trh);
+        document.getElementById("editableTable").appendChild(thead);
+
+        // Inicializar el contenedor de filtros
+        updateFilterInputsContainer();
+
+
+        $(document).ready(() => {
+          dataTableInstance = $('#editableTable').DataTable({
+            serverSide: true,
+            processing: true,
+            language: {
+              search: "_INPUT_", 
+              searchPlaceholder: "Buscar...",
+              lengthMenu: "Mostrar  _MENU_  filas",
+              info: "_TOTAL_ Personas Registradas", 
+              infoEmpty: "0 personas",
+              infoFiltered: "(filtrado de _MAX_ registros)",
+              paginate: {
+                previous: "<- Anterior",
+                next: "Siguiente ->"
+              }
+            },
+            fixedHeader: {
+              header: true,
+              headerOffset: 0
+            },
+            ajax: { 
+              url: '/api/excel', 
+              type: 'GET',
+              data: function(d) {
+                // Enviar filtros dinámicos y rango de edad al backend
+                d.filters = JSON.stringify(activeFilters.filter(f => f.column && f.value));
+                d.minAge = $('#minAgeInput').val();
+                d.maxAge = $('#maxAgeInput').val();
+              }
+            },
+            columns: [
+              ...headers.map(h => ({
+                data: h,
+                render: (_, type, row) => {
+                  if (type === 'display') {
+                    let valor = row[h] || '';
+
+                    // --- LÓGICA DE ICONOS (Solo para Nombre completo) ---
+                    let iconosHtml = "";
+                    if (h === "Nombre completo") {
+                      let discapacidad = row["Tipo de discapacidad"] ? row["Tipo de discapacidad"].trim().toLowerCase() : "";
+                      if (discapacidad !== "" && discapacidad !== "ninguna") {
+                        iconosHtml += `<i class="bi bi-person-fill-exclamation text-danger" title="${discapacidad}"></i> `;
+                      }
+                      let edad = parseInt(row["Edad"]) || 0;
+                      if (edad >= 60) iconosHtml += `<i class="bi bi-person-walking text-warning"></i> `;
+                      else if (edad < 18) iconosHtml += `<i class="bi bi-backpack text-info"></i> `;
+                      else iconosHtml += `<i class="bi bi-person text-secondary"></i> `;
+                    }
+
+                    // --- MODO LECTURA ---
+                    if (readOnlyMode) {
+                      if (h === "Nombre completo") {
+                        return `<div class="nombre-flex"><span>${iconosHtml}</span> <span>${valor}</span></div>`;
+                      }
+                      return valor;
+                    }
+
+                    // --- MODO EDICIÓN ---
+                    // 1. Si la columna es un SELECT
+                    if (opcionesSelect[h]) {
+                      let opciones = opcionesSelect[h].map(opt => 
+                        `<option value="${opt}" ${valor === opt ? 'selected' : ''}>${opt}</option>`
+                      ).join('');
+                      return `<select class="form-select-table" data-key="${h}" data-row="${row.__row}">${opciones}</select>`;
+                    }
+
+                    // 2. Si es Nombre Completo (Iconos + Input)
+                    if (h === "Nombre completo") {
+                      return `<div class="nombre-flex"><span>${iconosHtml}</span> <input class="form-input-table" data-key="${h}" data-row="${row.__row}" value="${valor}" /></div>`;
+                    }
+
+                    // 3. Input normal para el resto
+                    return `<input class="form-input-table" data-key="${h}" data-row="${row.__row}" value="${valor}" />`;
+                  }
+                  return row[h];
+                }
+              })),
+              { data: "__row", visible: false }
+            ],
+            pageLength: 10,
+            scrollX: true
+          });
+
+          
+
+          const setupEditEvents = () => {
+            // Escuchar tanto 'input' (teclado) como 'change' (para los select)
+            $('#editableTable tbody').on('input change', 'input, select', function() {
+                const input = $(this);
+                const rowNum = input.data('row');
+                const key = input.data('key');
+                const value = input.val();
+
+                if (!pendingChanges[rowNum]) {
+                    pendingChanges[rowNum] = { '__row': rowNum.toString() };
+                    input.closest('tr').css('background-color', '#fff3cd');
+                }
+                pendingChanges[rowNum][key] = value;
+            });
+        };
+
+          setupEditEvents();
+
+          $('#exportar').on('click', function() {
+            const searchValue = dataTableInstance.search();
+            let exportUrl = `/api/excel/export?search[value]=${encodeURIComponent(searchValue)}`;
+            exportUrl += `&filters=${encodeURIComponent(JSON.stringify(activeFilters.filter(f => f.column && f.value)))}`;
+            exportUrl += `&minAge=${encodeURIComponent($('#minAgeInput').val() || '')}`;
+            exportUrl += `&maxAge=${encodeURIComponent($('#maxAgeInput').val() || '')}`;
+            
+            window.location.href = exportUrl;
+          });
+
+          $('#exportarPDF').on('click', function() {
+            const searchValue = dataTableInstance.search();
+            let exportUrl = `/api/pdf/export?search[value]=${encodeURIComponent(searchValue)}`;
+            exportUrl += `&filters=${encodeURIComponent(JSON.stringify(activeFilters.filter(f => f.column && f.value)))}`;
+            exportUrl += `&minAge=${encodeURIComponent($('#minAgeInput').val() || '')}`;
+            exportUrl += `&maxAge=${encodeURIComponent($('#maxAgeInput').val() || '')}`;
+            
+            window.location.href = exportUrl;
+          });
+
+          document.getElementById("toggleMode").addEventListener("click", () => {
+            readOnlyMode = !readOnlyMode;
+            const toggleButton = document.getElementById("toggleMode");
+            const modeStatus = document.getElementById("modeStatus");
+            const editControls = document.getElementById("editControls");
+
+            if (readOnlyMode) {
+              toggleButton.textContent = "Alternar Modo (Lectura)";
+              modeStatus.textContent = "Modo: Lectura";
+              modeStatus.classList.remove("bg-success");
+              modeStatus.classList.add("bg-secondary");
+              editControls.style.display = 'none';
+            } else {
+              toggleButton.textContent = "Alternar Modo (Edición)";
+              modeStatus.textContent = "Modo: Edición";
+              modeStatus.classList.remove("bg-secondary");
+              modeStatus.classList.add("bg-success");
+              editControls.style.display = 'block';
+            }
+
+            dataTableInstance.columns.adjust().draw();
+            setupEditEvents();
+          });
+
+          // Manejo del botón "Aplicar Filtro"
+          document.getElementById("applyFilterButton").addEventListener("click", () => {
+            dataTableInstance.ajax.reload();
+            $('#filterModal').modal('hide');
+          });
+
+          // Manejo del botón "Agregar otro filtro"
+          document.getElementById("addFilterInput").addEventListener("click", () => {
+            if (excelHeaders.length > 0) {
+              activeFilters.push({ column: excelHeaders[0], value: '' });
+              updateFilterInputsContainer();
+            } else {
+              Toastify({ 
+                text: "No se encontraron columnas para filtrar.", duration: 3000, gravity: "bottom", position: "right", backgroundColor: "red" 
+              }).showToast();
+            }
+          });
+
+          // Manejo del botón "Limpiar Todos los Filtros"
+          document.getElementById("clearAllFiltersButton").addEventListener("click", () => {
+            activeFilters = []; 
+            $('#minAgeInput').val('');
+            $('#maxAgeInput').val('');
+            updateFilterInputsContainer(); 
+            dataTableInstance.ajax.reload();
+            $('#filterModal').modal('hide');
+          });
+
+
+          const editControls = document.getElementById("editControls");
+          const toggleButton = document.getElementById("toggleMode");
+          const modeStatus = document.getElementById("modeStatus");
+
+          if (readOnlyMode) {
+            editControls.style.display = 'none';
+            toggleButton.textContent = "Alternar Modo (Lectura)";
+            modeStatus.textContent = "Modo: Lectura";
+            modeStatus.classList.add("bg-secondary");
+            modeStatus.classList.remove("bg-success");
+          } else {
+            editControls.style.display = 'block';
+            toggleButton.textContent = "Alternar Modo (Edición)";
+            modeStatus.textContent = "Modo: Edición";
+            modeStatus.classList.add("bg-success");
+            modeStatus.classList.remove("bg-secondary");
+          }
+        });
+      });
+
+    document.getElementById("guardar").addEventListener("click", () => {
+      const datos = Object.values(pendingChanges);
+
+      if (datos.length === 0) {
+        alert("No hay cambios para guardar.");
+        return;
+      }
+
+      // 1. Guardamos el mensaje en una variable (instancia)
+      const syncToast = Toastify({ 
+        text: "Sincronizando con Dropbox... Por favor espere.", 
+        duration: -1, // No se quita solo
+        gravity: "bottom", 
+        position: "right", 
+        backgroundColor: "blue"
+      });
+
+      // 2. Lo mostramos
+      syncToast.showToast();
+
+      // 3. Desactivamos el botón para evitar que le den mil veces
+      const btnGuardar = document.getElementById("guardar");
+      btnGuardar.disabled = true;
+
+      fetch("/api/update-excel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ datos })
+      }).then(res => {
+        // 4. USAMOS EL MÉTODO OFICIAL PARA CERRARLO
+        syncToast.hideToast(); 
+        btnGuardar.disabled = false;
+
+        if (res.ok) {
+          Toastify({ 
+            text: "¡Guardado en Dropbox exitosamente!", 
+            duration: 3000, gravity: "bottom", position: "right", backgroundColor: "green" 
+          }).showToast();
+
+          pendingChanges = {};
+          dataTableInstance.ajax.reload(null, false);
+
+        } else {
+          Toastify({ 
+            text: "Error al sincronizar con la nube.", 
+            duration: 5000, gravity: "bottom", position: "right", backgroundColor: "red" 
+          }).showToast();
+        }
+        
+      }).catch(err => {
+        syncToast.hideToast();
+        btnGuardar.disabled = false;
+        alert("Error de conexión: " + err);
+      });
+    });
+
+    document.getElementById("descartar").addEventListener("click", () => {
+      if (Object.keys(pendingChanges).length > 0 && confirm("¿Estás seguro de que quieres descartar los cambios?")) {
+        pendingChanges = {};
+        dataTableInstance.ajax.reload(null, false);
+
+        Toastify({ 
+          text: "¡Cambios descartados!", duration: 2000, gravity: "bottom", position: "right", backgroundColor: "orange" 
+        }).showToast();
+
+      } else if (Object.keys(pendingChanges).length === 0) {
+        alert("No hay cambios pendientes para descartar.");
+      }
+    });
+
+
+    // --- Lógica para Importación/Exportación Completa ---
+
+// Botón Exportar Original
+document.getElementById('exportarFull').addEventListener('click', function() {
+    window.location.href = '/api/excel/download-full';
+});
+
+// Manejo del cambio en el input de archivo
+document.getElementById('fileInputFull').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('excelFile', file);
+
+    // Mostrar mensaje de carga
+    Toastify({ text: "Subiendo y procesando base de datos...", duration: 3000, backgroundColor: "blue" }).showToast();
+
+    fetch('/api/excel/upload-full', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            Toastify({ text: "¡Base de datos reemplazada con éxito!", duration: 4000, backgroundColor: "green" }).showToast();
+            // Recargar la tabla para ver los nuevos datos
+            setTimeout(() => { location.reload(); }, 1500);
+        } else {
+            response.text().then(text => {
+                alert("Error: " + text);
+            });
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error en la conexión al subir el archivo.");
+    });
+});
+  </script>
+</body>
+</html>

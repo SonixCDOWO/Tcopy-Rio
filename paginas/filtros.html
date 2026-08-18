@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resumen Estadístico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/Navs&Headers.css">
+  <link rel="stylesheet" href="/assets/css/Sidebar.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      min-height: 100vh;
+      margin: 0;
+      color: #1e293b;
+    }
+    .main-wrapper {
+      max-width: 1350px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+    .panel-card {
+      background: #ffffff;
+      border-radius: 1rem;
+      border: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      padding-bottom: 2rem;
+    }
+    .header-gradient {
+      background: linear-gradient(120deg, #5d2c6c, #441752) !important; /* Degradado Morado */
+      color: white;
+      padding: 1.5rem;
+      border-radius: 1rem 1rem 0 0;
+      margin-bottom: 1.5rem;
+    }
+    .kpi-card {
+      border: none;
+      border-radius: 0.75rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    .kpi-icon {
+      font-size: 2.2rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+      <!-- Sidebar Lateral -->
+  <div class="wapper-aside">
+    <aside class="sidebar">
+      <ul class="sidebar_list">
+        <a href="/index">
+          <li class="sidebar_element">
+            <img src="../assets/icons/regresar.svg" alt="home" class="sidebar_icon" width="35px" height="35px">
+            <div class="sidebar_hide"><p class="sidebar_text">Inicio</p></div>
+          </li>
+        </a>
+        <a href="/base_de_datos">
+          <li class="sidebar_element">
+            <img src="../assets/icons/datos-black.png" alt="estadisticas" class="sidebar_icon" width="20px" height="30px">
+            <div class="sidebar_hide"><p class="sidebar_text">Base de datos</p></div>
+          </li>
+        </a>
+        <a href="/comunidades">
+          <li class="sidebar_element">
+            <img src="../assets/icons/vista rapida-black.png" alt="informe" class="sidebar_icon" width="30px" height="30px">
+            <div class="sidebar_hide"><p class="sidebar_text">Jerarquía</p></div>
+          </li>
+        </a>
+        
+        <a href="/filtros">
+            <li class="sidebar_element">
+                <i class="bi bi-pie-chart-fill sidebar_icon" style="font-size: 1.5rem; text-align: center; color: #000000;"></i>
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Estadísticas</p>
+                </div>
+            </li>
+          </a>
+
+            <a href="/historia">
+            <li class="sidebar_element">
+                <img src="../assets/icons/historial.svg" alt="informe" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Historial</p>
+                </div>
+            </li>
+          </a>
+            
+          <a href="/calendario">
+            <li class="sidebar_element">
+                <img src="../assets/icons/calendario.svg" alt="calendario" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Calendario</p>
+                </div>
+            </li>
+          </a>           
+
+          <a href="/galeria">
+            <li class="sidebar_element">
+                <img src="../assets/icons/galeria.svg" alt="galeria" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Galeria</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/listado_votantes">
+            <li class="sidebar_element">
+                <img src="../assets/icons/cuaderno-votacion.svg" alt="votantes" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Listado de Votantes</p>
+                </div>
+            </li>
+          </a>
+
+          <a href="/importar">
+            <li class="sidebar_element">
+                <img src="../assets/icons/importar.png" alt="importar" class="sidebar_icon" width="30px" height="30px">
+                
+                <div class="sidebar_hide">
+                    <p class="sidebar_text">Importar Datos</p>
+                </div>
+            </li>
+          </a>
+
+
+      </ul>
+    </aside>
+  </div>
+
+
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand nav-link text-white" href="/">
+        <i class="bi bi-cpu-fill text-warning"></i> Octava Estrella
+      </a>
+    </div>
+  </nav>
+
+
+
+  <main class="main-wrapper">
+    <div class="card panel-card">
+      
+      <div class="header-gradient d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h2 class="mb-0 fw-bold"><i class="bi bi-bar-chart-line-fill me-2"></i>Resumen Estadístico</h2>
+          <small class="text-white-50">Estadísticas preestablecidas por grupos demográficos y géneros.</small>
+        </div>
+      </div>
+
+      <div class="px-4">
+        
+        <!-- Tarjetas Metricas Generales -->
+        <div class="row g-3 mb-4">
+          
+          <div class="col-12 col-md-4">
+            <div class="card kpi-card bg-primary text-white shadow-sm p-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="text-white text-uppercase fw-bold mb-1">Total Habitantes</h6>
+                  <h2 class="fw-bold mb-0" id="totalHabitantes">0</h2>
+                </div>
+                <i class="bi bi-people-fill kpi-icon"></i>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Tarjetas por Grupos de Edad -->
+        <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-diagram-3-fill me-2"></i>Distribución por Edades</h5>
+        
+        <div class="row g-3">
+          
+          <div class="col-6 col-md-3">
+            <div class="card kpi-card border-start border-4 border-info bg-light p-3">
+              <span class="text-muted small fw-bold">MENORES (0 - 17 años)</span>
+              <h3 class="fw-bold text-dark mt-2 mb-0" id="rtMenores">0</h3>
+                <small class="text-muted">
+                    <span style="color: blue;">♂ <b id="menoresH">0</b></span> | 
+                    <span style="color: #dc3545;">♀ <b id="menoresM">0</b></span>
+                </small>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <div class="card kpi-card border-start border-4 border-success bg-light p-3">
+              <span class="text-muted small fw-bold">JÓVENES (18 - 35 años)</span>
+              <h3 class="fw-bold text-dark mt-2 mb-0" id="rtJovenes">0</h3>
+                <small class="text-muted">
+                    <span style="color: blue;">♂ <b id="jovenesH">0</b></span> | 
+                    <span style="color: #dc3545;">♀ <b id="jovenesM">0</b></span>
+                </small>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <div class="card kpi-card border-start border-4 border-primary bg-light p-3">
+              <span class="text-muted small fw-bold">ADULTOS (36 - 59 años)</span>
+              <h3 class="fw-bold text-dark mt-2 mb-0" id="rtAdultos">0</h3>
+                <small class="text-muted">
+                    <span style="color: blue;">♂ <b id="adultosH">0</b></span> | 
+                    <span style="color: #dc3545;">♀ <b id="adultosM">0</b></span>
+                </small>
+            </div>
+          </div>
+
+          <div class="col-6 col-md-3">
+            <div class="card kpi-card border-start border-4 border-warning bg-light p-3">
+              <span class="text-muted small fw-bold">ANCIANOS (60+ años)</span>
+              <h3 class="fw-bold text-dark mt-2 mb-0" id="rtViejos">0</h3>
+                <small class="text-muted">
+                    <span style="color: blue;">♂ <b id="ancianosH">0</b></span> | 
+                    <span style="color: #dc3545;">♀ <b id="ancianosM">0</b></span>
+                </small>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-secondary mt-4 mb-3" ><i class="bi bi-pie-chart-fill me-2"></i> Visualización de Datos</h5>
+            
+            <div class="d-flex align-items-center gap-2">
+                <label for="selectMetrica" class="fw-bold mb-0">Métrica:</label>
+                <select id="selectMetrica" class="form-select w-auto fw-bold text-primary">
+                <option value="demografia" selected>Distribución Demográfica (Edad / Género)</option>
+                <option value="territorial">Distribución Territorial (Por Comunidad)</option>
+                <option value="educacion_laboral">Nivel Educativo y Situación Laboral</option>
+                <option value="vivienda">Vivienda y Servicios</option>
+                <option value="salud">Salud y Atención Especial</option>
+                <option value="egresos">Control de Egresos (Mudanzas / Fallecimientos)</option>
+                <!-- En el futuro podrás añadir más opciones aquí -->
+                </select>
+            </div>
+            </div>
+
+            <!-- Vista 1: Distribución Demográfica -->
+            <div id="vistaDemografia" class="row">
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm">
+                <h5 class="text-center">Distribución por Género</h5>
+                <div style="height: 300px;"><canvas id="chartGenero"></canvas></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm">
+                <h5 class="text-center">Distribución por Grupo Etario</h5>
+                <div style="height: 300px;"><canvas id="chartEdad"></canvas></div>
+                </div>
+            </div>
+
+            <div class="col-md-12 mt-3">
+              <div class="card p-3 shadow-sm h-100">
+                <h5 class="text-center fw-bold text-muted mb-3">Parentesco / Rol Familiar</h5>
+                <div style="height: 300px;"><canvas id="chartParentesco"></canvas></div>
+              </div>
+            </div>
+            </div>
+
+            <!-- Vista 2: Distribución Territorial -->
+            <div id="vistaTerritorial" class="row g-3 d-none">
+              <!-- Izquierda: Dona por Comunidad -->
+              <div class="col-12 col-md-6">
+                <div class="card p-3 shadow-sm h-100">
+                  <h5 class="text-center fw-bold text-muted mb-3">Distribución Global por Comunidad</h5>
+                  <div style="height: 500px;">
+                    <canvas id="chartComunidades"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Derecha: Barras Apiladas por Torre -->
+              <div class="col-12 col-md-6">
+                <div class="card p-3 shadow-sm h-100">
+                  <h5 class="text-center fw-bold text-muted mb-3">Distribución Detallada por Torre</h5>
+                  <div style="height: 500px;">
+                    <canvas id="chartTorres"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vista 3: Educación y Trabajo -->
+            <div id="vistaEducacionLaboral" class="row g-3 d-none">
+              <div class="col-12 col-md-6">
+                <div class="card p-3 shadow-sm h-100">
+                  <h5 class="text-center fw-bold text-muted mb-3">Nivel Educativo</h5>
+                  <div style="height: 400px;">
+                    <canvas id="chartEducacion"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="card p-3 shadow-sm h-100">
+                  <h5 class="text-center fw-bold text-muted mb-3">Situación Laboral / Ocupación</h5>
+                  <div style="height: 400px;">
+                    <canvas id="chartLaboral"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vista 4: Vivienda y Servicios -->
+            <div id="vistaVivienda" class="row g-3 d-none">
+              <div class="col-12">
+                <div class="card p-3 shadow-sm">
+                  <h5 class="text-center fw-bold text-muted mb-3">Estatus de Tenencia (Condición Vivienda)</h5>
+                  <div style="height: 400px;">
+                    <canvas id="chartVivienda"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vista 6: Salud y Atención -->
+            <div id="vistaSalud" class="row g-3 d-none">
+              <div class="col-12 col-md-6">
+                <div class="card p-3 shadow-sm h-100">
+                  <h5 class="text-center fw-bold text-muted mb-3">Enfermedades Crónicas</h5>
+                  <div style="height: 400px;">
+                    <canvas id="chartEnfermedades"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="card p-3 shadow-sm h-100">
+                  <h5 class="text-center fw-bold text-muted mb-3">Tipo de Discapacidad</h5>
+                  <div style="height: 400px;">
+                    <canvas id="chartDiscapacidades"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 mt-3">
+                <div class="card p-4 shadow-sm">
+                  <h5 class="text-center fw-bold text-muted mb-3">Control de Medicamentos (Top requeridos)</h5>
+                  <div class="table-responsive">
+                    <table class="table table-hover table-striped align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th scope="col" class="fw-bold">Medicamento</th>
+                          <th scope="col" class="fw-bold text-end">Cantidad de personas</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tablaMedicamentosBody">
+                        <tr>
+                          <td colspan="2" class="text-muted text-center py-3">No hay datos</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+
+            <!-- Vista 7: Control de Egresos -->
+            <div id="vistaEgresos" class="row g-3 d-none">
+              <!-- KPI Total Egresos -->
+              <div class="col-12 col-md-4">
+                <div class="card kpi-card bg-danger text-white shadow-sm p-3">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="text-white text-uppercase fw-bold mb-1">Total Egresos</h6>
+                      <h2 class="fw-bold mb-0" id="totalEgresos">0</h2>
+                    </div>
+                    <i class="bi bi-person-x-fill kpi-icon"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gráfica de Motivos de Egreso -->
+              <div class="col-12 col-md-8">
+                <div class="card p-3 shadow-sm h-100">
+                  <h5 class="text-center fw-bold text-muted mb-3">Distribución por Motivo de Egreso</h5>
+                  <div style="height: 350px;">
+                    <canvas id="chartEgresos"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+            
+            </div>
+          </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+   Chart.register(ChartDataLabels);
+
+   let chartComunidadesInstance = null;
+
+    // Manejo del selector
+    document.getElementById('selectMetrica').addEventListener('change', function(e) {
+      const sel = e.target.value;
+      document.getElementById('vistaDemografia').classList.toggle('d-none', sel !== 'demografia');
+      document.getElementById('vistaTerritorial').classList.toggle('d-none', sel !== 'territorial');
+      document.getElementById('vistaEducacionLaboral').classList.toggle('d-none', sel !== 'educacion_laboral');
+      document.getElementById('vistaVivienda').classList.toggle('d-none', sel !== 'vivienda');
+      document.getElementById('vistaSalud').classList.toggle('d-none', sel !== 'salud');
+      document.getElementById('vistaEgresos').classList.toggle('d-none', sel !== 'egresos');
+    });
+
+    fetch('/api/dashboard-stats')
+    .then(res => res.json())
+    .then(data => {
+        // 1. Actualización de contadores en tarjetas
+        document.getElementById('totalHabitantes').textContent = data.total_personas;
+        document.getElementById('rtMenores').textContent = data.rt_menores;
+        document.getElementById('rtJovenes').textContent = data.rt_adultos_jovenes;
+        document.getElementById('rtAdultos').textContent = data.rt_adultos;
+        document.getElementById('rtViejos').textContent = data.rt_ancianos;
+
+        document.getElementById('menoresH').textContent = data.menores_hombres;
+        document.getElementById('menoresM').textContent = data.menores_mujeres;
+
+        document.getElementById('jovenesH').textContent = data.jovenes_hombres;
+        document.getElementById('jovenesM').textContent = data.jovenes_mujeres;
+
+        document.getElementById('adultosH').textContent = data.adultos_hombres;
+        document.getElementById('adultosM').textContent = data.adultos_mujeres;
+
+        document.getElementById('ancianosH').textContent = data.ancianos_hombres;
+        document.getElementById('ancianosM').textContent = data.ancianos_mujeres;
+
+        const total = data.total_personas || 1; // Evitar división por cero
+
+        // 2. Gráfica de Barras: Género (Izquierda)
+        const ctxGenero = document.getElementById('chartGenero').getContext('2d');
+        new Chart(ctxGenero, {
+        type: 'bar',
+        data: {
+            labels: ['Hombres', 'Mujeres'],
+            datasets: [{
+            label: 'Cantidad',
+            data: [data.hombres, data.mujeres],
+            backgroundColor: ['blue', 'red'],
+            borderRadius: 6,
+            maxBarThickness: 120,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+            legend: { display: false },
+            datalabels: {
+                anchor: 'center',
+                align: 'center',
+                offset: -25,
+                color: '#ffffff',
+                font: { weight: 'bold', size: 15 },
+                formatter: (value) => {
+                    const pct = ((value / total) * 100).toFixed(1);
+                    return `${value}\n(${pct}%)`;
+                }
+            }
+            },
+            scales: {
+            y: { beginAtZero: true }
+            }
+        }
+        });
+
+        // 3. Gráfica de Barras: Grupo Etario (Derecha)
+        const ctxEdad = document.getElementById('chartEdad').getContext('2d');
+        new Chart(ctxEdad, {
+        type: 'bar',
+        data: {
+            labels: ['Menores (0-17)', 'Jóvenes (18-35)', 'Adultos (36-59)', 'Ancianos (60+)'],
+            datasets: [{
+            label: 'Cantidad',
+            data: [
+                data.rt_menores,
+                data.rt_adultos_jovenes,
+                data.rt_adultos,
+                data.rt_ancianos
+            ],
+            backgroundColor: ['#0dcaf0', '#198754', '#0d6efd', 'brown'],
+            borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+            legend: { display: false },
+            datalabels: {
+                anchor: 'center',
+                align: 'center',
+                offset: -25,
+                color: '#ffffff',
+                font: { weight: 'bold', size: 15 },
+                formatter: (value) => {
+                const pct = ((value / total) * 100).toFixed(1);
+                return `${value}\n(${pct}%)`;
+                }
+            }
+            },
+            scales: {
+            y: { beginAtZero: true }
+            }
+        }
+        });
+
+       let chartParentescoInstance = null;
+
+      if (data.distribucion_parentesco) {
+        const parentescoLabels = Object.keys(data.distribucion_parentesco);
+        const parentescoValues = Object.values(data.distribucion_parentesco);
+        const canvasElem = document.getElementById('chartParentesco');
+
+        if (canvasElem) {
+          if (chartParentescoInstance) chartParentescoInstance.destroy();
+
+          // Define la constante para evitar ReferenceError si data.total_personas es 0 o undefined
+          const totalPoblacion = data.total_personas && data.total_personas > 0 ? data.total_personas : 1;
+
+          chartParentescoInstance = new Chart(canvasElem.getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: parentescoLabels,
+              datasets: [{
+                data: parentescoValues,
+                backgroundColor: [
+                  '#2563eb', '#10b981', '#f59e0b', '#ef4444', 
+                  '#06b6d4', '#8b5cf6', '#ec4899', '#64748b'
+                ],
+                borderRadius: 6,
+                maxBarThickness: 50
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              categoryPercentage: 0.8,
+              barPercentage: 0.9,
+              plugins: {
+                legend: { display: false },
+                datalabels: {
+                  color: '#ffffff',
+                  anchor: 'center',
+                  align: 'center',
+                  font: { weight: 'bold', size: 11 },
+                  formatter: (val) => {
+                    const pct = ((val / totalPoblacion) * 100).toFixed(1);
+                    return `${val}\n(${pct}%)`;
+                  }
+                }
+              },
+              scales: {
+                x: { 
+                  ticks: { 
+                    font: { weight: 'bold', size: 10 },
+                    maxRotation: 45,
+                    minRotation: 45
+                  } 
+                },
+                y: { beginAtZero: true, grace: '5%' }
+              }
+            }
+          });
+        }
+      }
+
+        // Paleta de colores vibrantes para distinguir las comunidades
+        const coloresDona = [
+          'blue', 'gray', 'green', 'red', 
+          'purple', 'indigo', 'orange', 'darkgreen', 
+          'darkgray', 'brown', 'magenta', 'cyan'
+        ];
+
+        if (data.comunidades) {
+          const comunidadesLabels = Object.keys(data.comunidades);
+          const comunidadesValues = Object.values(data.comunidades);
+
+          const ctxComunidades = document.getElementById('chartComunidades').getContext('2d');
+          
+          if (chartComunidadesInstance) {
+            chartComunidadesInstance.destroy(); // Destruir la instancia previa si cambia el selector
+          }
+
+          chartComunidadesInstance = new Chart(ctxComunidades, {
+            type: 'doughnut',
+            data: {
+              labels: comunidadesLabels,
+              datasets: [{
+                data: comunidadesValues,
+                backgroundColor: coloresDona.slice(0, comunidadesLabels.length),
+                borderWidth: 2,
+                borderColor: '#ffffff'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'right', // Posiciona la leyenda al lado derecho
+                  labels: {
+                    usePointStyle: false,
+                    boxWidth: 28,
+                    boxHeight: 14,
+                    padding: 12,
+                    font: { size: 12, weight: 'bold' }
+                  }
+                },
+                datalabels: {
+                  anchor: 'center',
+                  align: 'center',
+                  color: '#ffffff',
+                  font: { weight: 'bold', size: 16 },
+                  formatter: (value) => {
+                    const pct = ((value / data.total_personas) * 100).toFixed(1);
+                    return `${value}\n(${pct}%)`;
+                  },
+                  display: function(context) {
+                    const dataset = context.dataset;
+                    const value = dataset.data[context.dataIndex];
+                    const percentage = (value / data.total_personas) * 100;
+                    return percentage >= 3; // Solo muestra si es mayor o igual a 4%
+                  },
+                }
+              },
+              cutout: '40%' // Define el grosor del agujero central de la dona
+            }
+          });
+        }
+
+        let chartTorresInstance = null;
+
+        // Dentro del fetch('/api/dashboard-stats'):
+        if (data.torres) {
+          const comunidades = Object.keys(data.torres); // Eje X (19A, 19B, MZA, etc.)
+
+          // Obtener todas las torres únicas de todas las comunidades
+          const torresSet = new Set();
+          comunidades.forEach(com => {
+            Object.keys(data.torres[com]).forEach(t => torresSet.add(t));
+          });
+          const torresUnicas = Array.from(torresSet);
+
+          const paletaColores = [
+            '#2563eb', '#7c3aed', '#db2777', '#dc2626',
+            '#d97706', '#059669', '#0891b2', '#4f46e5'
+          ];
+
+          // Generar un dataset por cada Torre
+          const datasetsTorres = torresUnicas.map((torreName, index) => {
+            return {
+              label: `Torre ${torreName}`,
+              data: comunidades.map(com => data.torres[com][torreName] || 0),
+              backgroundColor: paletaColores[index % paletaColores.length],
+              maxBarThickness: 50
+            };
+          });
+
+          const ctxTorres = document.getElementById('chartTorres').getContext('2d');
+          
+          if (chartTorresInstance) {
+            chartTorresInstance.destroy();
+          }
+
+          chartTorresInstance = new Chart(ctxTorres, {
+            type: 'bar',
+            data: {
+              labels: comunidades,
+              datasets: datasetsTorres
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              categoryPercentage: 1, // Porcentaje de espacio asignado a cada columna (máx 1.0)
+              barPercentage: 2,
+              plugins: {
+                legend: { display: false }, // Se oculta la leyenda para que se vea amplio
+                datalabels: {
+                  anchor: 'center',
+                  align: 'center',
+                  color: '#ffffff',
+                  font: { weight: 'bold', size: 12 },
+                  display: function(ctx) {
+                    const value = ctx.dataset.data[ctx.dataIndex];
+                    return value >= 15; // Solo muestra si la torre tiene 15 o más habitantes
+                  },
+                  formatter: (value) => value
+                }
+              },
+              scales: {
+                x: {
+                  stacked: true, // Habilita apilamiento en el eje X
+                  padding: 10,
+                  ticks: { font: { weight: 'bold', size: 11 } }
+                },
+                y: {
+                  stacked: true, // Habilita apilamiento en el eje Y
+                  beginAtZero: true,
+                  padding: 10,
+                  ticks: { font: { weight: 'bold', size: 11 } }
+                }
+              }
+            }
+          });
+        }
+
+        // Instanciación dentro de fetch('/api/dashboard-stats'):
+        let chartEduInstance = null;
+        let chartLabInstance = null;
+
+        const paletaEducacion = ['#2563eb', '#059669', '#d97706', '#dc2626', '#0891b2', '#7c3aed', '#ea580c', '#10b981'];
+
+        // 1. Gráfica de Barras para Nivel Educativo
+        if (data.nivel_educativo) {
+          const eduLabels = Object.keys(data.nivel_educativo);
+          const eduValues = Object.values(data.nivel_educativo);
+
+          const ctxEdu = document.getElementById('chartEducacion').getContext('2d');
+          if (chartEduInstance) chartEduInstance.destroy();
+
+          chartEduInstance = new Chart(ctxEdu, {
+            type: 'bar',
+            data: {
+              labels: eduLabels,
+              datasets: [{
+                data: eduValues,
+                backgroundColor: paletaEducacion.slice(0, eduLabels.length),
+                borderRadius: 6,
+                maxBarThickness: 50
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                datalabels: {
+                  anchor: 'center',
+                  align: 'center',
+                  color: '#ffffff',
+                  font: { weight: 'bold', size: 11 },
+                  formatter: (val) => `${val}\n(${((val / data.total_personas) * 100).toFixed(1)}%)`
+                }
+              },
+              scales: {
+                x: {
+                  ticks: {
+                    font: { weight: 'bold', size: 10 },
+                    maxRotation: 45, // Inclina los textos si son muy largos (como TECNICO SUPERIOR)
+                    minRotation: 45
+                  }
+                },
+                y: { beginAtZero: true }
+              }
+            }
+          });
+        }
+
+        // 2. Gráfica de Dona para Situación Laboral (Oculta números pequeños < 3% para no saturar)
+        if (data.situacion_laboral) {
+          const labLabels = Object.keys(data.situacion_laboral);
+          const labValues = Object.values(data.situacion_laboral);
+
+          const ctxLab = document.getElementById('chartLaboral').getContext('2d');
+          if (chartLabInstance) chartLabInstance.destroy();
+
+          chartLabInstance = new Chart(ctxLab, {
+            type: 'doughnut',
+            data: {
+              labels: labLabels,
+              datasets: [{
+                data: labValues,
+                backgroundColor: [
+                  '#2563eb', '#059669', '#d97706', '#dc2626', '#0891b2', 
+                  '#7c3aed', '#ea580c', '#10b981', '#6d28d9', '#db2777'
+                ],
+                borderWidth: 2
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '45%',
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: { font: { size: 11, weight: 'bold' }, boxWidth: 15 }
+                },
+                datalabels: {
+                  anchor: 'center',
+                  align: 'center',
+                  color: '#ffffff',
+                  font: { weight: 'bold', size: 10 },
+                  display: (ctx) => {
+                    const val = ctx.dataset.data[ctx.dataIndex];
+                    return ((val / data.total_personas) * 100) >= 1; // Oculta si representa menos de 3%
+                  },
+                  formatter: (val) => `${val}\n(${((val / data.total_personas) * 100).toFixed(1)}%)`
+                }
+              }
+            }
+          });
+        }
+
+        let chartViviendaInstance = null;
+
+        if (data.condicion_vivienda) {
+          const viviendaLabels = Object.keys(data.condicion_vivienda);
+          const viviendaValues = Object.values(data.condicion_vivienda);
+
+          const ctxVivienda = document.getElementById('chartVivienda').getContext('2d');
+          if (chartViviendaInstance) chartViviendaInstance.destroy();
+
+          chartViviendaInstance = new Chart(ctxVivienda, {
+            type: 'bar',
+            data: {
+              labels: viviendaLabels,
+              datasets: [{
+                data: viviendaValues,
+                backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6'],
+                borderRadius: 6,
+                maxBarThickness: 65
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              // Ocupa el 70% del ancho asignado para dejar separación clara entre barras
+              categoryPercentage: 0.7,
+              barPercentage: 0.8,
+              plugins: {
+                legend: { display: false },
+                datalabels: {
+                  color: (ctx) => ctx.dataset.data[ctx.dataIndex] <= 2 ? '#374151' : '#ffffff', // Oscuro si la barra es muy bajita
+                  anchor: (ctx) => ctx.dataset.data[ctx.dataIndex] <= 2 ? 'end' : 'center',    // Arriba si es pequeña
+                  align: (ctx) => ctx.dataset.data[ctx.dataIndex] <= 2 ? 'top' : 'center',
+                  font: { weight: 'bold', size: 10 },
+                  formatter: (val) => {
+                    const pct = ((val / data.total_personas) * 100).toFixed(1);
+                    return `${val}\n(${pct}%)`;
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  ticks: { font: { weight: 'bold', size: 11 } }
+                },
+                y: {
+                  beginAtZero: true,
+                  grace: '10%' // Margen superior dinámico en el eje Y para que los textos no choquen con el techo
+                }
+              }
+            }
+          });
+        }
+
+        let chartEnfermedadesInstance = null;
+        let chartDiscapacidadesInstance = null;
+
+        // 1. Gráfica de Enfermedades Crónicas
+        if (data.enfermedades && Object.keys(data.enfermedades).length > 0) {
+          const enfLabels = Object.keys(data.enfermedades);
+          const enfValues = Object.values(data.enfermedades);
+          const ctxEnf = document.getElementById('chartEnfermedades');
+
+          if (ctxEnf) {
+            if (chartEnfermedadesInstance) chartEnfermedadesInstance.destroy();
+
+            chartEnfermedadesInstance = new Chart(ctxEnf.getContext('2d'), {
+              type: 'bar',
+              data: {
+                labels: enfLabels,
+                datasets: [{
+                  data: enfValues,
+                  backgroundColor: '#ef4444',
+                  borderRadius: 6,
+                  maxBarThickness: 50
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  datalabels: {
+                    color: '#ffffff',
+                    font: { weight: 'bold', size: 10 },
+                    formatter: (val) => {
+                      const totalPoblacion = (data.total_personas && data.total_personas > 0) ? data.total_personas : 1;
+                      const pct = ((val / totalPoblacion) * 100).toFixed(1);
+                      return `${val}\n(${pct}%)`;
+                    }
+                  }
+                },
+                scales: {
+                  x: { ticks: { font: { weight: 'bold', size: 10 }, maxRotation: 45, minRotation: 45 } },
+                  y: { beginAtZero: true, grace: '5%' }
+                }
+              }
+            });
+          }
+        }
+
+        // 2. Gráfica de Tipo de Discapacidad
+        if (data.discapacidades && Object.keys(data.discapacidades).length > 0) {
+          const discLabels = Object.keys(data.discapacidades);
+          const discValues = Object.values(data.discapacidades);
+          const ctxDisc = document.getElementById('chartDiscapacidades');
+
+          if (ctxDisc) {
+            if (chartDiscapacidadesInstance) chartDiscapacidadesInstance.destroy();
+
+            chartDiscapacidadesInstance = new Chart(ctxDisc.getContext('2d'), {
+              type: 'doughnut',
+              data: {
+                labels: discLabels,
+                datasets: [{
+                  data: discValues,
+                  backgroundColor: [
+                    '#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b'
+                  ],
+                  borderWidth: 2
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '45%',
+                plugins: {
+                  legend: { position: 'right', labels: { font: { size: 11, weight: 'bold' } } },
+                  datalabels: {
+                    color: '#ffffff',
+                    font: { weight: 'bold', size: 10 },
+                    formatter: (val) => {
+                      const totalPoblacion = (data.total_personas && data.total_personas > 0) ? data.total_personas : 1;
+                      const pct = ((val / totalPoblacion) * 100).toFixed(1);
+                      return `${val}\n(${pct}%)`;
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+
+        // Renderizado de Tabla Control de Medicamentos
+        const tbodyMedicamentos = document.getElementById('tablaMedicamentosBody');
+
+        if (data.medicamentos && Object.keys(data.medicamentos).length > 0) {
+          // Convertir objeto a Array y ordenar de mayor a menor frecuencia
+          const medSorted = Object.entries(data.medicamentos)
+            .sort((a, b) => b[1] - a[1]);
+
+          let rowsHtml = '';
+          medSorted.forEach(([medicamento, cantidad]) => {
+            rowsHtml += `
+              <tr>
+                <td class="fw-bold text-dark">${medicamento}</td>
+                <td class="text-end fw-bold text-primary">${cantidad}</td>
+              </tr>
+            `;
+          });
+
+          tbodyMedicamentos.innerHTML = rowsHtml;
+        } else {
+          tbodyMedicamentos.innerHTML = `
+            <tr>
+              <td colspan="2" class="text-muted text-center py-3">No hay datos</td>
+            </tr>
+          `;
+        }
+
+        let chartEgresosInstance = null;
+
+        // Actualizar tarjeta KPI
+        document.getElementById('totalEgresos').textContent = data.total_egresos || 0;
+
+        if (data.motivos_egreso && Object.keys(data.motivos_egreso).length > 0) {
+          const egresoLabels = Object.keys(data.motivos_egreso);
+          const egresoValues = Object.values(data.motivos_egreso);
+          const ctxEgresos = document.getElementById('chartEgresos');
+
+          if (ctxEgresos) {
+            if (chartEgresosInstance) chartEgresosInstance.destroy();
+
+            const totalEgresosNum = data.total_egresos || 1;
+
+            chartEgresosInstance = new Chart(ctxEgresos.getContext('2d'), {
+              type: 'bar',
+              data: {
+                labels: egresoLabels,
+                datasets: [{
+                  data: egresoValues,
+                  backgroundColor: ['#f59e0b', '#dc2626', '#6b7280', '#0284c7'], // Colores distintivos (ej: Naranja para Mudanza, Rojo para Fallecimiento)
+                  borderRadius: 6,
+                  maxBarThickness: 60
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  datalabels: {
+                    color: '#ffffff',
+                    font: { weight: 'bold', size: 12 },
+                    formatter: (val) => {
+                      const pct = ((val / totalEgresosNum) * 100).toFixed(1);
+                      return `${val}\n(${pct}%)`;
+                    }
+                  }
+                },
+                scales: {
+                  x: { ticks: { font: { weight: 'bold', size: 11 } } },
+                  y: { beginAtZero: true, grace: '10%' }
+                }
+              }
+            });
+          }
+        }
+    })
+    .catch(err => console.error('Error al cargar datos e inicializar gráficos:', err));
+</script>
+</body>
+</html>
